@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'webuser',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -55,7 +56,7 @@ ROOT_URLCONF = 'zhihuCopy.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR,'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -76,8 +77,12 @@ WSGI_APPLICATION = 'zhihuCopy.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'zhihucopy',
+        'HOST':'127.0.0.1',
+        'USER':'root',
+        'PASSWORD':'root',
+        'PORT':'3307',
     }
 }
 
@@ -106,7 +111,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
@@ -119,3 +124,23 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATIC_URL = '/static/'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+ADMINS = (
+    # ('Your Name', 'your_email@example.com'),
+   
+)
+
+MANAGERS = ADMINS
+
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.qq.com'
+EMAIL_PORT = 25
+
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+
+DEFAULT_FROM_EMAIL = ''
+SERVER_EMAIL = ''
