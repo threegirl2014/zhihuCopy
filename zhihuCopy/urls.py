@@ -26,4 +26,6 @@ urlpatterns = [
     url(r'^people/(?P<name>[-\d\w]+)/$', zhihuuserViews.people, name='people'),
     url(r'^register/email/$', zhihuuserViews.register, name='register'),
     url(r'^login/email/$', zhihuuserViews.weblogin, name='login'),
+    url('^logout/$', zhihuuserViews.weblogout, name='logout'),
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
