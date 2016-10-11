@@ -1,2 +1,123 @@
 {% extends 'base.html' %}
 {% load static %}
+
+{% block title %}
+	{{ zhihuuser.fullname }} - 知乎
+{% endblock title %}
+
+{% block main %}
+<div class="zg-wrap zu-main clearfix " role="main">
+	<div class="zu-main-content">
+		<div class="zu-main-content-inner">
+			<div class="zm-profile-header ProfileCard">
+				<div class="zm-profile-header-main">
+					<div class="body clearfix">
+						<div class="ProfileAvatarEditor">
+							<img class="Avatar Avatar--l" src={{zhihuuser.avatar.url}} srcset={{zhihuuser.avatar.url}} alt="{{ zhihuuser.fullname }}">
+							<span class="ProfileAvatarEditor-tip">修改头像</span>
+							<span class="ProfileAvatarEditor-spinner Spinner"></span>
+						</div>
+						<!-- <form target="av_up_frame" style="display:none;" method="post" enctype="multipart/form-data" action="https://upload.zhihu.com:/upload_avatar"><label for="avt_file"></label><input type="file" accept="image/*" name="picture" id="avt_file"><input type="hidden" name="handle_mode" value="upload"><input type="hidden" name="type" value="1"><input type="hidden" name="dest_id" value="12c62a4f2d41b6fc3c3c28b6cc76e74c"><input type="hidden" name="return_size" value="l"></form> -->
+						<div class="top">
+							<div class="title-section">
+								<span class="name">{{ zhihuuser.fullname }}</span>
+								<a class="icon-badge-wrapper" href="#"></a>
+							</div>
+						</div>
+
+						{% include 'zhihuuser/header-info.html' %}
+
+					</div>
+				</div>
+				<div class="zm-profile-header-operation zg-clear  zm-profile-header-operation-myview">
+					<div class="zm-profile-header-info-list">
+						<span class="zm-profile-header-info-title">获得</span>
+						<span class="zm-profile-header-user-agree"><span class="zm-profile-header-icon"></span><strong>{{zhihuuser.agree}}</strong>赞同</span>
+						<span class="zm-profile-header-user-thanks"><span class="zm-profile-header-icon"></span><strong>{{zhihuuser.thanks}}</strong>感谢</span>
+					</div>
+					<a class="zm-profile-header-user-edit-btn zg-btn-green zg-right" href="/people/edit">完善我的资料</a>
+				</div>
+				<div class="profile-navbar clearfix">
+					<a class="item home first active" href="{% url 'people' name=user.username %}">
+						<i class="icon icon-profile-tab-home"></i>
+						<span class="hide-text">主页</span>
+					</a>
+					<a class="item " href="{% url 'asks' name=user.username %}">
+						提问
+						<span class="num">{{zhihuuser.asks_count}}</span>
+					</a>
+					<a class="item " href="{% url 'answers' name=user.username %}">
+						回答
+						<span class="num">{{zhihuuser.answers_count}}</span>
+					</a>
+					<a class="item " href="{% url 'posts' name=user.username %}">
+						文章
+						<span class="num">{{zhihuuser.posts_count}}</span>
+					</a>
+
+					<a class="item " href="{% url 'collections' name=user.username %}">
+						收藏
+						<span class="num">{{zhihuuser.collections_count}}</span>
+					</a>
+					<a class="item " href="{% url 'logs' name=user.username %}">
+						公共编辑
+						<span class="num">{{zhihuuser.logs_count}}</span>
+					</a>
+				</div>
+			</div>
+			<div class="profile-expert-tip">
+			</div>
+			<div class="zm-profile-section-wrap">
+			</div>
+			<div class="zm-profile-section-wrap zm-profile-ask-wrap" id="zm-profile-ask-wrap">
+			</div>
+			<div class="zm-profile-section-wrap" id="zm-profile-activity-wrap">
+			</div>			
+		</div>
+	</div>
+	<div class="zu-main-sidebar" data-za-module="RightSideBar">
+		<div class="zu-profile-side-following zg-clear">
+			<a class="item" href="{% url 'followees' name=user.username %}">
+				<span class="zg-gray-normal">关注了</span>
+				<br>
+				<strong>{{zhihuuser.followees.count}}</strong>
+				<label> 人</label>
+			</a>
+			<a class="item" href="{% url 'followers' name=user.username %}">
+				<span class="zg-gray-normal">关注者</span>
+				<br>
+				<strong>{{zhihuuser.followers.count}}</strong>
+				<label> 人</label>
+			</a>
+		</div>
+		<div class="zm-profile-side-section">
+		</div>
+		<div class="zm-profile-side-section">
+		</div>
+		<div class="zm-profile-side-section">
+			<div class="zm-side-section-inner">
+				<span class="zg-gray-normal">
+					个人主页被 
+					<strong>{{zhihuuser.browser_count}}</strong> 
+					人浏览
+				</span>
+			</div>
+		</div>
+		<script type="text/json" class="json-inline" data-name="current_people"></script>
+		<div id="zh-footer" class="zh-footer">
+		<div class="content zg-wrap clearfix">
+			<ul>
+				<li><a href="https://liukanshan.zhihu.com" target="_blank">刘看山</a></li>
+				<li><a href="/question/19581624" target="_blank">知乎指南</a></li>
+				<li><a href="javascript:;" id="js-feedback-button">建议反馈</a></li>
+				<li><a href="/app" target="_blank">移动应用</a></li>
+				<li><a href="/careers">加入知乎</a></li>
+				<li><a href="/terms" target="_blank">知乎协议</a></li>
+				<li><a href="/contact">联系我们</a></li>
+			</ul>
+			<span class="copy">© 2016 知乎</span>
+			</div>
+		</div>				
+	</div>
+</div>
+{% endblock main %}

@@ -69,9 +69,8 @@ def home(request):
     if request.user.is_authenticated():
         zhihuuser = ZhihuUser.objects.get(user=request.user)        
         args = dict()
-        args['fullname'] = zhihuuser.fullname
-        args['username'] = request.user.username
-        args['avatar'] = zhihuuser.avatar.url
+        args['zhihuuser'] = zhihuuser
+        args['user'] = zhihuuser.user
         return render(request,"zhihuuser/home.html",args)
     else:
         args = dict()
@@ -84,11 +83,32 @@ def people(request,name):
     user = User.objects.get(username=name)
     zhihuuser = ZhihuUser.objects.get(user=user)
     args = dict()
-    args['fullname'] = zhihuuser.fullname
-    args['username'] = user.username
-    args['avatar'] = zhihuuser.avatar.url
+    args['zhihuuser'] = zhihuuser
+    args['user'] = user
     return render(request,"zhihuuser/people.html",args)
 
 def weblogout(request):
     logout(request)
     return redirect('/')
+
+
+def show_asks(request,name):
+    pass
+
+def show_answers(request,name):
+    pass
+
+def show_posts(request,name):
+    pass
+
+def show_collections(request,name):
+    pass
+
+def show_logs(request,name):
+    pass
+
+def show_followees(request,name):
+    pass
+
+def show_followers(request,name):
+    pass

@@ -11,7 +11,8 @@
 		<meta http-equiv="X-ZA-Response-Id" content="000343b4338d7f4e">
 		<meta http-equiv="X-ZA-Experiment" content="default:None,ab_feature1:cmt_v1">
 		<title>
-			{{ fullname }} - 知乎
+			{% block title %}
+			{% endblock title %}
 		</title>
 		<meta name="apple-itunes-app" content="app-id=432274380">
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -126,20 +127,20 @@
 					知乎
 				</a>
 				<div class="top-nav-profile">
-					<a href={% url 'people' name=username %} class="zu-top-nav-userinfo selected"
+					<a href={% url 'people' name=user.username %} class="zu-top-nav-userinfo selected"
 					id=":0" role="button" aria-haspopup="true" aria-activedescendant="">
 						<span class="name">
-							{{ fullname }}
+							{{ zhihuuser.fullname }}
 						</span>
-						<img class="Avatar" src={{avatar}} srcset={{avatar}}
-						alt="{{ fullname }}">
+						<img class="Avatar" src={{zhihuuser.avatar.url}} srcset={{zhihuuser.avatar.url}}
+						alt="{{ zhihuuser.fullname }}">
 						<span id="zh-top-nav-new-pm" class="zg-noti-number zu-top-nav-pm-count"
 						style="visibility:hidden" data-count="0">
 						</span>
 					</a>
 					<ul class="top-nav-dropdown" id="top-nav-profile-dropdown" aria-labelledby=":0">
 						<li>
-							<a href={% url 'people' name=username %} tabindex="-1" id=":1">
+							<a href={% url 'people' name=user.username %} tabindex="-1" id=":1">
 								<i class="zg-icon zg-icon-dd-home">
 								</i>
 								我的主页
@@ -339,10 +340,10 @@
 				</div>
 			</div>
 		</div>
-		<div class="zg-wrap zu-main clearfix " role="main">
-			{% block main %}
-			{% endblock main %}
-		</div>
+		
+		{% block main %}
+		{% endblock main %}
+		
 		<script type="text/json" class="json-inline" data-name="guiders2">
 			{
 				"exclusive-popover": {},

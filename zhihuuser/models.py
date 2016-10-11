@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 from django.contrib.auth.models import User
 from django.db import models
-from questions.models import Topic
 
 # Create your models here.
 
@@ -27,13 +26,18 @@ class ZhihuUser(models.Model):
     followers = models.ManyToManyField('self', blank=True)
     followees = models.ManyToManyField('self', blank=True)
     
-    topics = models.ManyToManyField(Topic, blank=True)
+    topics = models.ManyToManyField('questions.Topic', blank=True, related_name='followers')
+    questions = models.ManyToManyField('questions.Question', blank=True, related_name='followers')
     
     browser_count = models.IntegerField(default=0)
     agree = models.IntegerField(default=0)
     thanks = models.IntegerField(default=0)
-    questions_count = models.IntegerField(default=0)
-    replies_count = models.IntegerField(default=0)
+    asks_count = models.IntegerField(default=0)
+    answers_count = models.IntegerField(default=0)
+    posts_count = models.IntegerField(default=0)
+    collections_count = models.IntegerField(default=0)
+    logs_count = models.IntegerField(default=0)
+    
     
     def __unicode__(self):
         return self.user.username
