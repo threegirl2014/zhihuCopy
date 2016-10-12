@@ -71,6 +71,7 @@ def home(request):
         args = dict()
         args['zhihuuser'] = zhihuuser
         args['user'] = zhihuuser.user
+        args['message_count'] = 999
         return render(request,"zhihuuser/home.html",args)
     else:
         args = dict()

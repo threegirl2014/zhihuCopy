@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse
 
 class Topic(models.Model):
     name = models.CharField(max_length=50)
-    father_topics = models.ManyToManyField('self',verbose_name='father topics',related_name='sons')
+    father_topics = models.ManyToManyField('self',verbose_name='father topics',related_name='sons', blank=True, symmetrical=False)
     description = models.TextField(blank=True)
     followers_count = models.IntegerField(default=0)
     

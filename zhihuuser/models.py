@@ -23,8 +23,8 @@ class ZhihuUser(models.Model):
     education = models.CharField(max_length=50, blank=True)
     employment = models.CharField(max_length=50, blank=True)
     
-    followers = models.ManyToManyField('self', blank=True)
-    followees = models.ManyToManyField('self', blank=True)
+    followers = models.ManyToManyField('self', blank=True, symmetrical=False, related_name='myFans')
+    followees = models.ManyToManyField('self', blank=True, symmetrical=False, related_name='BigVips')
     
     topics = models.ManyToManyField('questions.Topic', blank=True, related_name='followers')
     questions = models.ManyToManyField('questions.Question', blank=True, related_name='followers')
