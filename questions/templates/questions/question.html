@@ -6,120 +6,105 @@
 {% endblock title %}
 
 {% block main %}
-	<div class="zg-wrap zu-main clearfix with-indention-votebar" itemscope itemtype="http://schema.org/Question" id="zh-single-question-page" data-urltoken="{{q.id}}" role="main">
-		<div class="zu-main-content">
-			<div class="zu-main-content-inner">
-
-				<div class="zm-tag-editor zg-section">
-					<div class="zm-tag-editor-labels zg-clear">
+<div class="container-fluid">
+	<div class="row-fluid">
+		<div class="col-lg-6 col-lg-offset-1">
+			<div class="row-fluid">
+				<div class="col-lg-12">
+					<div>
 						{% for topic in topics %}
-							<a class="zm-item-tag" href="/topic/{{topic.id}}" data-hovercard="t$b${{topic.id}}"
-							data-token="{{topic.id}}" data-topicid="#">
-								topic.name
+							<a class="label label-primary" href="/topic/{{topic.id}}">
+								{{topic.name}}
 							</a>							
 						{% endfor %}
 					</div>
 				</div>
-				<div id="zh-question-title" data-editable="true">
-					<h2 class="zm-item-title">
-						<span class="zm-editable-content">
+				<div class="col-lg-12">
+					<h3>
+						<span>
 							{{q.title}}
 						</span>
-					</h2>
-				</div>
-				<div id="zh-question-detail" class="zm-item-rich-text" 
-				data-action="/question/detail">
-					<div class="zm-editable-content">
-						{{q.details}}
-					</div>
-				</div>	
-				<div class="zm-item-meta zm-item-comment-el clearfix" id="zh-question-meta-wrap" data-za-module="QuestionItem">
-					<div class="zm-meta-panel goog-scrollfloater">
-						<a href="#" name="report-question" class="report zg-right">
-							<i class="z-icon-report-o"></i>
-							举报
-						</a>
-						<a href="#" name="addcomment" class="toggle-comment meta-item">
-							<i class="z-icon-comment"></i>
-							添加评论
-						</a>
-						<a href="#" name="share" class="share meta-item goog-inline-block goog-menu-button" role="button" aria-expanded="false" tabindex="0" aria-haspopup="true" style="-webkit-user-select: none;">
-							<div class="goog-inline-block goog-menu-button-outer-box">
-								<div class="goog-inline-block goog-menu-button-inner-box">
-									<div class="goog-inline-block goog-menu-button-caption">
-										<i class="z-icon-share"></i>
-										分享
-									</div>
-								<div class="goog-inline-block goog-menu-button-dropdown">
-									&nbsp;
-								</div>
-								</div>
-							</div>
-						</a>
-						<span class="zg-bull">•</span>
-						<a href="#" name="invite" class="meta-item">邀请回答</a>
-					</div>
-					<div class="panel-container">
-						<div class="question-invite-panel"></div>
-						<div class="zm-comment-box" style="display: none;"></div>
-					</div>
-				</div>	
-				<div class="zh-answers-title clearfix">
-					<div id="zh-answers-filter" class="Sorter">
-						<span class="lbl">
-							默认排序
-						</span>
-						<a class="lbl" href="/question/{{q.id}}?sort=created">
-							按时间排序
-						</a>
-						<i class="zg-icon zg-icon-double-arrow">
-						</i>
-					</div>
-					<h3 data-num="{{q.replies.count()}}" id="zh-question-answer-num">
-						{{q.replies.count()}} 个回答
 					</h3>
 				</div>
-				<div id="zh-question-answer-wrap" data-pagesize="10" class="zh-question-answer-wrapper"
-					data-widget="navigable" data-navigable-options="{&quot;items&quot;: &quot;&gt;.zm-item-answer&quot;}"
-					data-init="{&quot;params&quot;: {&quot;url_token&quot;: {{q.id}}, &quot;pagesize&quot;: 10, &quot;offset&quot;: 0}, &quot;nodename&quot;: &quot;QuestionAnswerListV2&quot;}">
+				<div class="col-lg-12">
+					<div>
+						<p>{{q.details}}</p>
+					</div>
+				</div>	
+				<div class="col-lg-12">
+					<p>
+						<a href="#" name="report-question" class="pull-right" >
+							<span class="glyphicon glyphicon-flag">举报
+						</a>
+						<a href="#" name="addcomment" >
+							<span class="glyphicon glyphicon-comment">添加评论
+						</a>
+						<a href="#" >
+							<span class="glyphicon glyphicon-share">分享
+						</a>
+						<span >•</span>
+						<a href="#" name="invite">邀请回答</a>
+					</p>
+				</div>
+				<div  class="col-lg-12">
+					<hr />
+					<div class="pull-right">
+						<span>
+							默认排序
+						</span>
+						<a  href="/question/{{q.id}}?sort=created">
+							按时间排序
+						</a>
+						<i >
+						</i>
+					</div>
+					<h3 >
+						{{q.replies.count}} 个回答
+					</h3>
+					<hr />
+				</div>	
+				<div class="col-lg-12">
 					{% for reply in replies %}	
-						<div tabindex="-1" class="zm-item-answer  zm-item-expanded" itemprop="topAnswer"
-						itemscope itemtype="http://schema.org/Answer" data-aid="#" data-atoken="#"
-						data-collapsed="0" data-created="#" data-deleted="0" data-helpful="1"
-						data-isowner="0" data-copyable="1">					
+						<div >					
 							<link itemprop="url" href="/question/{{q.id}}/answer/{{reply.id}}">
 							<meta itemprop="answer-id" content="{{reply.id}}">
 							<meta itemprop="answer-url-token" content="{{reply.id}}">
-							<a class="zg-anchor-hidden" name="answer-{{reply.id}}"></a>							
-							<div class="zm-votebar">
-								<button class="up ">
-									<i class="icon vote-arrow">
-									</i>
-									<span class="count">
-										{{reply.up_vote}}
-									</span>
-									<span class="label sr-only">
-										赞同
-									</span>
-								</button>
-								<button class="down ">
-									<i class="icon vote-arrow">
-									</i>
-									<span class="label sr-only">
-										反对
-									</span>
-								</button>
+							<a name="answer-{{reply.id}}"></a>					
+							<div class="col-lg-1">
+								<div class="btn-group-vertical " role="group">
+									{% if reply.updownflag == 'U' %}
+									<button type="button" class="btn btn-success btn-xs" title="赞同" id="up{{reply.id}}" data-replyid="{{reply.id}}" flag="up">
+										<span class="glyphicon glyphicon-chevron-up"></span>
+									</button>									
+									{% else %}
+									<button type="button" class="btn btn-default btn-xs" title="赞同" id="up{{reply.id}}" data-replyid="{{reply.id}}" flag="up">
+										<span class="glyphicon glyphicon-chevron-up"></span>
+									</button>
+									{% endif %}
+									<button type="button" class="btn btn-default btn-xs">
+										<span class="count" id="votecount_{{reply.id}}">{{reply.up_vote}}</span>
+									</button>
+									{% if reply.updownflag == 'D' %}
+									<button type="button" class="btn btn-success btn-xs" title="反对" id="down{{reply.id}}" data-replyid="{{reply.id}}" flag="down">
+										<span class="glyphicon glyphicon-chevron-down"></span>
+									</button>									
+									{% else %}
+									<button type="button" class="btn btn-default btn-xs" title="反对" id="down{{reply.id}}" data-replyid="{{reply.id}}" flag="down">
+										<span class="glyphicon glyphicon-chevron-down"></span>
+									</button>
+									{% endif %}									
+								</div>
 							</div>
-							<div class="answer-head">
-								<div class="zm-item-answer-author-info">
-									<a class="zm-item-link-avatar avatar-link" href="{% url 'people' name=reply.author.user.username %}" target="_blank"
+							<div class="col-lg-11">
+								<div >
+									<a  class="pull-right" href="{% url 'people' name=reply.author.user.username %}" target="_blank"
 									data-hovercard="p$t$edtall">
 										<img src="{{reply.author.avatar.url}}"
 										class="zm-list-avatar avatar">
 									</a>
-									<span class="summary-wrapper">
-										<span class="author-link-line">
-											<a class="author-link" data-hovercard="p$t$edtall" target="_blank" href="{% url 'people' name=reply.author.user.username %}">
+									<span >
+										<span >
+											<a  target="_blank" href="{% url 'people' name=reply.author.user.username %}">
 												{{reply.author.fullname}}
 											</a>
 										</span>
@@ -128,106 +113,117 @@
 										</span>
 									</span>
 								</div>
-								<div class="zm-item-vote-info" data-votecount="{{reply.up_vote}}">
+								<div  data-votecount="{{reply.up_vote}}">
 									<span class="voters text">
 										&nbsp;
 										<a href="#" class="more text">
-											<span class="js-voteCount">
+											<span id="votecount_2_{{reply.id}}">
 												{{reply.up_vote}}
 											</span>
 											&nbsp;人赞同
 										</a>
 									</span>
 								</div>
-							</div>												
-							<div class="zm-item-rich-text expandable js-collapse-body" data-resourceid="#"
-							data-action="/answer/content" data-author-name="{{reply.author.fullname}}" data-entry-url="/question/{{q.id}}/answer/{{reply.id}}">
-								<div class="zh-summary summary clearfix" style="display:block;">
-									{{reply.details}}
-								</div>								
-							</div>
-							<div class="zm-item-meta answer-actions clearfix js-contentActions">
-								<div class="zm-meta-panel">
-									<a itemprop="url" class="answer-date-link meta-item" target="_blank" href="/question/{{q.id}}/answer/{{reply.id}}">
-										发布于 {{reply.create_date}}
-									</a>
-									<a href="#" name="addcomment" class="meta-item toggle-comment js-toggleCommentBox">
-										<i class="z-icon-comment">
-										</i>
-										{{reply.comments_count}} 条评论
-									</a>
-									<a href="#" class="meta-item zu-autohide js-thank" data-thanked="false">
-										<i class="z-icon-thank">
-										</i>
-										感谢
-									</a>
-									<a href="#" class="meta-item zu-autohide js-share">
-										<i class="z-icon-share">
-										</i>
-										分享
-									</a>
-									<a href="#" class="meta-item zu-autohide js-collect">
-										<i class="z-icon-collect">
-										</i>
-										收藏
-									</a>
-									<span class="zg-bull zu-autohide">
-										&bull;
-									</span>
-									<a href="#" class="meta-item zu-autohide js-noHelp">
-										没有帮助
-									</a>
-									<span class="zg-bull zu-autohide">
-										&bull;
-									</span>
-									<a href="#" class="meta-item zu-autohide js-report">
-										举报
-									</a>
-									<span class="zg-bull">
-										&bull;
-									</span>
-								
-								</div>
-							</div>							
+								<div  class="panel panel-default">
+									<div class="panel-body">
+										<p>{{reply.details}}</p>
+									</div>								
+								</div>	
+								<div >
+									<p >
+										<a itemprop="url" href="/question/{{q.id}}/answer/{{reply.id}}">
+											发布于 {{reply.create_date}}
+										</a>
+										<a href="#" name="addcomment" >
+											<i class="z-icon-comment">
+											</i>
+											{{reply.comments_count}} 条评论
+										</a>
+										<a href="#" >
+											<i >
+											</i>
+											感谢
+										</a>
+										<a href="#" >
+											<i >
+											</i>
+											分享
+										</a>
+										<a href="#" >
+											<i >
+											</i>
+											收藏
+										</a>
+										<span >
+											&bull;
+										</span>
+										<a href="#" >
+											没有帮助
+										</a>
+										<span >
+											&bull;
+										</span>
+										<a href="#" >
+											举报
+										</a>
+										<span >
+											&bull;
+										</span>
+									
+									</p>
+								</div>											
+								<hr />		
+							</div>											
 						</div>
 					{% endfor %}
-				</div>										
+				</div>							
 			</div>
 		</div>
-		<div class="zu-main-sidebar" data-za-module="RightSideBar">
-			<div class="zm-side-section">
-				<div class="zm-side-section-inner" id="zh-question-side-header-wrap">
-					<button data-follow="q:m:button" class="follow-button zg-follow zg-btn-green"
-					data-id="#">
-						关注问题
+		<div class="col-lg-2 col-lg-offset-1">
+			<div >
+				<div class="btn-group" role="group">
+					{% if isfollow %}
+					<button type="button" class="btn" id="interested" data-questionid="{{q.id}}">
+						取消关注
 					</button>
-					<div class="zg-btn-white" id="zh-question-operation-menu">
-						<i class="zg-icon-dropdown-menu zg-icon">
-						</i>
-						<b class="hide-text">
-							设置
-						</b>
-					</div>
-					<div class="zh-question-followers-sidebar">
-						<div class="zg-gray-normal">
+					{% else %}
+					<button type="button" class="btn btn-success" id="interested" data-questionid="{{q.id}}">
+						关注问题
+					</button>					
+					{% endif %}
+				</div>
+				<div class="btn-group" role="group">
+					<button type="button" class="btn dropdown-toggle" id="questionSetting" data-toggle="dropdown">
+						<span class="glyphicon glyphicon-cog"></span>
+						<span class="caret"></span>
+					</button>
+				    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+				      <li role="presentation"><a href="#">使用匿名身份</a></li>
+				      <li role="presentation" class="divider"></li>
+				      <li role="presentation"><a href="#">问题重定向</a></li>
+				    </ul>
+				</div>
+				<div>
+					<div >
+						<div >
 							<a href="/question/{{q.id}}/followers">
-								<strong>
+								<strong id='followerscount'>
 									{{q.followers_count}}
 								</strong>
 							</a>
 							人关注该问题
 						</div>
-						<div class="list zu-small-avatar-list zg-clear">
+						<div>
 						</div>
 					</div>
 				</div>
 			</div>
-			<div class="zm-side-section">
-				<div class="zm-side-section-inner">
+			<div >
+				<div >
 					<h3>
 						问题状态
 					</h3>
-					<div class="zg-gray-normal">
+					<div >
 						最近活动于
 						<span class="time">
 							昨天 99:99
@@ -252,7 +248,8 @@
 					</div>
 				</div>
 			</div>
-		</div>		
+		</div>
 	</div>
+</div>
 	{% include 'footer.html' %}
 {% endblock main %}

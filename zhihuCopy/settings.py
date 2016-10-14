@@ -137,6 +137,8 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+LOGIN_URL = '/'
+
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.qq.com'
 EMAIL_PORT = 25

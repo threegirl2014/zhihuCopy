@@ -22,7 +22,7 @@ class Topic(models.Model):
     
 class Question(models.Model):
     topics = models.ManyToManyField(Topic)
-    author = models.ForeignKey('zhihuuser.ZhihuUser')
+    author = models.ForeignKey('zhihuuser.ZhihuUser', related_name='isAuthor')
     title = models.CharField(max_length=200)
     details = models.TextField()
     create_date = models.DateTimeField(auto_now_add=True)
@@ -37,6 +37,11 @@ class Question(models.Model):
         return reverse('question')     
      
 class Reply(models.Model):
+    OPINIONS = (
+            ('N', 'No'),
+            ('U', 'Up'),
+            ('D', 'Down'),
+           )
     question = models.ForeignKey(Question,related_name='replies')
     author = models.ForeignKey('zhihuuser.ZhihuUser')
     details = models.TextField()
@@ -44,8 +49,10 @@ class Reply(models.Model):
     update_date = models.DateTimeField(auto_now=True)
     up_vote = models.IntegerField(default=0)
     down_vote = models.IntegerField(default=0)
+    votepeoples = models.ManyToManyField('zhihuuser.ZhihuUser', through='UpDownVote', related_name='votedreplies')
     thanks = models.IntegerField(default=0) 
     comments_count = models.IntegerField(default=0)
+    updownflag = models.CharField(max_length=1, choices=OPINIONS, default='N')
     
     class Meta:
         ordering = ['-up_vote', 'down_vote', '-thanks', 'create_date'] 
@@ -60,4 +67,12 @@ class Comment(models.Model):
     
     class Meta:
         ordering = ['create_date']
-      
+    
+class UpDownVote(models.Model):
+    OPINIONS = (
+                ('U', 'Up'),
+                ('D', 'Down'),
+               )
+    reply = models.ForeignKey(Reply)
+    voteman = models.ForeignKey('zhihuuser.ZhihuUser')
+    opinions = models.CharField(max_length=1, choices=OPINIONS,blank=True)       

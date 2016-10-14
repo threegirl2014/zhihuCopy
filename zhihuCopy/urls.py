@@ -30,6 +30,9 @@ urlpatterns = [
     url(r'^login/email/$', zhihuuserViews.weblogin, name='login'),
     url('^logout/$', zhihuuserViews.weblogout, name='logout'),
     
-    url(r'^question/(?P<question_id>\d+)/$', questionsViews.questionShow, name='question')
+    url(r'^question/(?P<question_id>\d+)/$', questionsViews.questionShow, name='question'),
     
+    url(r'^reply/upvote/$', questionsViews.upVoteAnswer, name='upVote'),
+    url(r'^reply/downvote/$', questionsViews.downVoteAnswer, name='downVote'),
+    url(r'^question/follow/$', questionsViews.followQuestion, name='questionFollow'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
