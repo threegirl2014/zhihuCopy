@@ -5,29 +5,31 @@ from django.http.response import HttpResponse
 # Create your views here.
 
 from zhihuuser.models import ZhihuUser
-from questions.models import UpDownVote
+from questions.models import UpDownVote,Topic
+from questions.forms import addQuestionForm, addReplyForm
+from django.shortcuts import redirect
 
-@login_required
-def questionShow(request,question_id):
+def getQuestionArgs(request,question_id):
     q = get_object_or_404(Question,pk=question_id)
     replies = Reply.objects.filter(question__id=question_id)
     args = dict()
     args['q'] = q
+    
     if 'sort' in request.GET:
         newSort = request.GET['sort']
         if newSort == 'created':
             args['replies'] = replies.order_by('create_date')
     else:
         args['replies'] = replies
-    user = request.user
-    args['user'] = user
-    zhihuuser = user.zhihuuser
-    args['zhihuuser'] = zhihuuser
-    args['topics'] = q.topics.all()
+    
+    zhihuuser = request.user.zhihuuser
+    args['zhihuuser'] = request.user.zhihuuser
+    
     if zhihuuser.questions.filter(pk=question_id).exists():
         args['isfollow'] = True
     else:
         args['isfollow'] = False
+    
     for reply in replies:
         if reply.votepeoples.filter(pk=zhihuuser.id).exists():
             updownvote = UpDownVote.objects.get(voteman=zhihuuser,reply=reply)
@@ -35,6 +37,18 @@ def questionShow(request,question_id):
         else:
             reply.updownflag = 'N'
         reply.save()
+    
+    if Reply.objects.filter(question=q, author=zhihuuser).exists():
+        args['hasReplied'] = True
+    else:
+        args['hasReplied'] = False
+    
+    return args
+
+@login_required
+def questionShow(request,question_id):
+    args = getQuestionArgs(request, question_id)
+    args['addReply'] = addReplyForm()
     return render(request, 'questions/question.html', args)
 
 @login_required
@@ -118,3 +132,34 @@ def followQuestion(request):
             print '>>>>>>>>>add: ', q.followers_count
         q.save()
     return HttpResponse(q.followers_count)
+
+@login_required
+def addQuestion(request):
+    if request.method == "POST":
+        form = addQuestionForm(request.POST)
+        if form.is_valid():
+            title = form.cleaned_data.get('title')
+            details = form.cleaned_data.get('details')
+            topics = form.cleaned_data.get('topics')
+            user = request.user.zhihuuser
+            question = Question.objects.create(author=user, title=title, details=details)
+            for item in topics.split(' '):
+                topic = Topic.objects.get(name=item)
+                question.topics.add(topic)
+            return redirect(question) 
+
+@login_required
+def addReply(request,question_id):
+    if request.method == "POST":
+        form = addReplyForm(request.POST)
+        if form.is_valid():
+            details = form.cleaned_data.get('details')
+            user = request.user.zhihuuser
+            question = Question.objects.get(pk=question_id)
+            reply = Reply.objects.create(author=user, details=details, question=question)
+            return redirect(question)
+        else:
+            args = getQuestionArgs(request, question_id)
+            args['addReply'] = form
+            return render(request, 'questions/question.html', args)
+        

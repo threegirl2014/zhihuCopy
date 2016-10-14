@@ -35,4 +35,8 @@ urlpatterns = [
     url(r'^reply/upvote/$', questionsViews.upVoteAnswer, name='upVote'),
     url(r'^reply/downvote/$', questionsViews.downVoteAnswer, name='downVote'),
     url(r'^question/follow/$', questionsViews.followQuestion, name='questionFollow'),
+    
+    url(r'^add/question/$', questionsViews.addQuestion, name='addQuestion'),
+    url(r'^question/(?P<question_id>\d+)/add/reply/$', questionsViews.addReply, name='addReply'),
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

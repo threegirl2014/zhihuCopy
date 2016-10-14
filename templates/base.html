@@ -7,6 +7,7 @@
 			{% endblock title %}
 		</title>
 		<script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+		<script src="http://static.runoob.com/assets/jquery-validation-1.14.0/dist/jquery.validate.min.js"></script>
 		<link href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet">
 		<script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
 		<script src="{% static 'zhihuuser/js/zhihu-copy-ajax.js' %}"></script>
@@ -81,22 +82,25 @@
 								<div class="modal fade" id="questionModal" tabindex="-1" role="dialog" aria-labelledby="questionLabel" aria-hidden="true">
 								  <div class="modal-dialog">
 								    <div class="modal-content">
-								      <div class="modal-header">
-								        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-								        <h4 class="modal-title" id="questionLabel">提问</h4>
-								      </div>
-								      <div class="modal-body">
+								    	<form action= "{% url 'addQuestion' %}", method="post" id="newQuestion">
+								    		{% csrf_token %}
+									      <div class="modal-header">
+									        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+									        <h4 class="modal-title" id="questionLabel">提问</h4>
+									      </div>
+									      <div class="modal-body">
 								      	
-								      	<textarea class="form-control" placeholder="写下你的问题"></textarea>
-								      	<p>问题说明（可选）：</p>
-								      	<textarea class="form-control" placeholder="问题背景、条件等详细信息"></textarea>
-								      	<p>选择话题：</p>	
-								      	<textarea class="form-control" placeholder="搜索话题"></textarea>							      	
-								      </div>
-								      <div class="modal-footer">
-								        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-								        <button type="button" class="btn btn-primary">发布</button>
-								      </div>
+									      	<textarea class="form-control" placeholder="写下你的问题" name="title" required maxlength="200"></textarea>
+									      	<p>问题说明（可选）：</p>
+									      	<textarea class="form-control" placeholder="问题背景、条件等详细信息" name="details"></textarea>
+									      	<p>选择话题：</p>	
+									      	<textarea class="form-control" placeholder="搜索话题" name="topics"></textarea>							      	
+									      </div>
+									      <div class="modal-footer">
+									        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+									        <button type="Submit" class="btn btn-primary">发布</button>
+									      </div>
+									    </form>
 								    </div>
 								  </div>
 								</div>								

@@ -62,4 +62,6 @@ $(document).ready(function() {
 			}
 		});
 	});
+
+	$("#newQuestion").validate();
 });

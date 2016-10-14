@@ -12,7 +12,7 @@
 			<div class="row-fluid">
 				<div class="col-lg-12">
 					<div>
-						{% for topic in topics %}
+						{% for topic in q.topics.all %}
 							<a class="label label-primary" href="/topic/{{topic.id}}">
 								{{topic.name}}
 							</a>							
@@ -65,117 +65,134 @@
 				</div>	
 				<div class="col-lg-12">
 					{% for reply in replies %}	
-						<div >					
-							<link itemprop="url" href="/question/{{q.id}}/answer/{{reply.id}}">
-							<meta itemprop="answer-id" content="{{reply.id}}">
-							<meta itemprop="answer-url-token" content="{{reply.id}}">
-							<a name="answer-{{reply.id}}"></a>					
-							<div class="col-lg-1">
-								<div class="btn-group-vertical " role="group">
-									{% if reply.updownflag == 'U' %}
-									<button type="button" class="btn btn-success btn-xs" title="赞同" id="up{{reply.id}}" data-replyid="{{reply.id}}" flag="up">
-										<span class="glyphicon glyphicon-chevron-up"></span>
-									</button>									
-									{% else %}
-									<button type="button" class="btn btn-default btn-xs" title="赞同" id="up{{reply.id}}" data-replyid="{{reply.id}}" flag="up">
-										<span class="glyphicon glyphicon-chevron-up"></span>
-									</button>
-									{% endif %}
-									<button type="button" class="btn btn-default btn-xs">
-										<span class="count" id="votecount_{{reply.id}}">{{reply.up_vote}}</span>
-									</button>
-									{% if reply.updownflag == 'D' %}
-									<button type="button" class="btn btn-success btn-xs" title="反对" id="down{{reply.id}}" data-replyid="{{reply.id}}" flag="down">
-										<span class="glyphicon glyphicon-chevron-down"></span>
-									</button>									
-									{% else %}
-									<button type="button" class="btn btn-default btn-xs" title="反对" id="down{{reply.id}}" data-replyid="{{reply.id}}" flag="down">
-										<span class="glyphicon glyphicon-chevron-down"></span>
-									</button>
-									{% endif %}									
-								</div>
+					<div >					
+						<link itemprop="url" href="/question/{{q.id}}/answer/{{reply.id}}">
+						<meta itemprop="answer-id" content="{{reply.id}}">
+						<meta itemprop="answer-url-token" content="{{reply.id}}">
+						<a name="answer-{{reply.id}}"></a>					
+						<div class="col-lg-1">
+							<div class="btn-group-vertical " role="group">
+								{% if reply.updownflag == 'U' %}
+								<button type="button" class="btn btn-success btn-xs" title="赞同" id="up{{reply.id}}" data-replyid="{{reply.id}}" flag="up">
+									<span class="glyphicon glyphicon-chevron-up"></span>
+								</button>									
+								{% else %}
+								<button type="button" class="btn btn-default btn-xs" title="赞同" id="up{{reply.id}}" data-replyid="{{reply.id}}" flag="up">
+									<span class="glyphicon glyphicon-chevron-up"></span>
+								</button>
+								{% endif %}
+								<button type="button" class="btn btn-default btn-xs">
+									<span class="count" id="votecount_{{reply.id}}">{{reply.up_vote}}</span>
+								</button>
+								{% if reply.updownflag == 'D' %}
+								<button type="button" class="btn btn-success btn-xs" title="反对" id="down{{reply.id}}" data-replyid="{{reply.id}}" flag="down">
+									<span class="glyphicon glyphicon-chevron-down"></span>
+								</button>									
+								{% else %}
+								<button type="button" class="btn btn-default btn-xs" title="反对" id="down{{reply.id}}" data-replyid="{{reply.id}}" flag="down">
+									<span class="glyphicon glyphicon-chevron-down"></span>
+								</button>
+								{% endif %}									
 							</div>
-							<div class="col-lg-11">
-								<div >
-									<a  class="pull-right" href="{% url 'people' name=reply.author.user.username %}" target="_blank"
-									data-hovercard="p$t$edtall">
-										<img src="{{reply.author.avatar.url}}"
-										class="zm-list-avatar avatar">
+						</div>
+						<div class="col-lg-11">
+							<div >
+								<a  class="pull-right" href="{% url 'people' name=reply.author.user.username %}" target="_blank"
+								data-hovercard="p$t$edtall">
+									<img src="{{reply.author.avatar.url}}"
+									class="zm-list-avatar avatar">
+								</a>
+								<span >
+									<span >
+										<a  target="_blank" href="{% url 'people' name=reply.author.user.username %}">
+											{{reply.author.fullname}}
+										</a>
+									</span>
+									<span class="badge-summary">
+										{{reply.author.headline_brief}}
+									</span>
+								</span>
+							</div>
+							<div  data-votecount="{{reply.up_vote}}">
+								<span class="voters text">
+									&nbsp;
+									<a href="#" class="more text">
+										<span id="votecount_2_{{reply.id}}">
+											{{reply.up_vote}}
+										</span>
+										&nbsp;人赞同
+									</a>
+								</span>
+							</div>
+							<div  class="panel panel-default">
+								<div class="panel-body">
+									<p>{{reply.details}}</p>
+								</div>								
+							</div>	
+							<div >
+								<p >
+									<a itemprop="url" href="/question/{{q.id}}/answer/{{reply.id}}">
+										发布于 {{reply.create_date}}
+									</a>
+									<a href="#" name="addcomment" >
+										<i class="z-icon-comment">
+										</i>
+										{{reply.comments_count}} 条评论
+									</a>
+									<a href="#" >
+										<i >
+										</i>
+										感谢
+									</a>
+									<a href="#" >
+										<i >
+										</i>
+										分享
+									</a>
+									<a href="#" >
+										<i >
+										</i>
+										收藏
 									</a>
 									<span >
-										<span >
-											<a  target="_blank" href="{% url 'people' name=reply.author.user.username %}">
-												{{reply.author.fullname}}
-											</a>
-										</span>
-										<span class="badge-summary">
-											{{reply.author.headline_brief}}
-										</span>
+										&bull;
 									</span>
-								</div>
-								<div  data-votecount="{{reply.up_vote}}">
-									<span class="voters text">
-										&nbsp;
-										<a href="#" class="more text">
-											<span id="votecount_2_{{reply.id}}">
-												{{reply.up_vote}}
-											</span>
-											&nbsp;人赞同
-										</a>
+									<a href="#" >
+										没有帮助
+									</a>
+									<span >
+										&bull;
 									</span>
-								</div>
-								<div  class="panel panel-default">
-									<div class="panel-body">
-										<p>{{reply.details}}</p>
-									</div>								
-								</div>	
-								<div >
-									<p >
-										<a itemprop="url" href="/question/{{q.id}}/answer/{{reply.id}}">
-											发布于 {{reply.create_date}}
-										</a>
-										<a href="#" name="addcomment" >
-											<i class="z-icon-comment">
-											</i>
-											{{reply.comments_count}} 条评论
-										</a>
-										<a href="#" >
-											<i >
-											</i>
-											感谢
-										</a>
-										<a href="#" >
-											<i >
-											</i>
-											分享
-										</a>
-										<a href="#" >
-											<i >
-											</i>
-											收藏
-										</a>
-										<span >
-											&bull;
-										</span>
-										<a href="#" >
-											没有帮助
-										</a>
-										<span >
-											&bull;
-										</span>
-										<a href="#" >
-											举报
-										</a>
-										<span >
-											&bull;
-										</span>
-									
-									</p>
-								</div>											
-								<hr />		
+									<a href="#" >
+										举报
+									</a>
+									<span >
+										&bull;
+									</span>
+								
+								</p>
 							</div>											
-						</div>
+							<hr />		
+						</div>											
+					</div>
 					{% endfor %}
+					{% if hasReplied %}
+					<div >
+						<p class="text-center">
+							一个问题你只能回答一次，但你可以对<mark><b>现有的回答</b></mark>进行修改
+						</p>
+					</div>
+					{% else %}
+					<div>
+						<form action="{% url 'addReply' question_id=q.id %}" method="post">
+							{% csrf_token %}
+							<span class="text-danger">{{ addReply.details.errors }}</span>
+							{{ addReply.details }}
+							<p></p>
+							<button type="Submit" class="btn btn-primary pull-right">发布回答</button>
+						</form>
+					</div>
+					{% endif %}
 				</div>							
 			</div>
 		</div>
