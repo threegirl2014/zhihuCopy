@@ -8,8 +8,12 @@ from zhihuuser.models import ZhihuUser
 from django.template.context import RequestContext
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-# Create your views here.    
+from django.db.models import Q
+   
+from questions.models import Notification
 
+
+# Create your views here. 
 
 def generateUsername(fullname):
     #type( fullname ) : unicode
@@ -67,11 +71,13 @@ def weblogin(request):
 
 def home(request):
     if request.user.is_authenticated():
-        zhihuuser = ZhihuUser.objects.get(user=request.user)        
+        zhihuuser = request.user.zhihuuser
+        notifies = Notification.objects.filter(notify_to_user__id=zhihuuser.id).filter( Q(notify_type='RF') | Q(notify_type='UF') | Q(notify_type='IF') )
         args = dict()
         args['zhihuuser'] = zhihuuser
         args['user'] = zhihuuser.user
-        args['message_count'] = 999
+        args['notifies'] = notifies
+        args['message_count'] = notifies.filter(status='U').count()
         return render(request,"zhihuuser/home.html",args)
     else:
         args = dict()

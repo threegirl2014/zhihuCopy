@@ -41,4 +41,5 @@ urlpatterns = [
     
     url(r'^question/(?P<question_id>\d+)/add/reply/$', questionsViews.addReply, name='addReply'),
     
+    url(r'^messagelist/$', questionsViews.getMessageList, name='messageList'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

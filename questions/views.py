@@ -2,10 +2,11 @@ from django.shortcuts import render, get_object_or_404
 from .models import Question, Reply, Comment
 from django.contrib.auth.decorators import login_required
 from django.http.response import HttpResponse
+from django.db.models import Q
 # Create your views here.
 
 from zhihuuser.models import ZhihuUser
-from questions.models import UpDownVote,Topic
+from questions.models import UpDownVote,Topic, Notification
 from questions.forms import addQuestionForm, addReplyForm
 from django.shortcuts import redirect
 
@@ -184,3 +185,12 @@ def addReply(request,question_id):
         
 def topicShow(request, topic_id):
     pass
+
+@login_required    
+def getMessageList(request):
+    zhihuuser = request.user.zhihuuser
+    notifies = Notification.objects.filter(notify_to_user__id=zhihuuser.id)
+    f_notifies = notifies.filter(notify_type='F')
+    u_t_notifies = notifies.filter( Q(notify_typ='U') | Q(notify_type='T'))
+    rq_rf_notifies = notifies.filter( Q(notify_type='RQ') | Q(notify_type='RF') )
+    return HttpResponse(locals())    

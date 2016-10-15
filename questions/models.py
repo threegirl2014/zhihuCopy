@@ -75,4 +75,35 @@ class UpDownVote(models.Model):
                )
     reply = models.ForeignKey(Reply)
     voteman = models.ForeignKey('zhihuuser.ZhihuUser')
-    opinions = models.CharField(max_length=1, choices=OPINIONS,blank=True)       
+    opinions = models.CharField(max_length=1, choices=OPINIONS,blank=True) 
+    
+class Notification(models.Model):
+    STATUS = (
+              ('R','read'),
+              ('U','unread'),
+              )
+    NOTIFY_TYPE = (
+                   ('F','follower'),
+                   ('U','upvote'),
+                   ('T','thanks'),
+                   ('C','comment'),
+                   ('RQ','replyFromQuestion'),
+                   ('RF','replyFromFollowee'),
+                   ('UF','upvoteFromFollowee'),
+                   ('IF','interestFromFollowee'),
+                   )
+    create_date = models.DateTimeField(auto_now_add=True)
+    notify_from_user = models.ForeignKey('zhihuuser.ZhihuUser', related_name='notify_from_user')
+    notify_to_user = models.ForeignKey('zhihuuser.ZhihuUser', related_name='notify_to_user')
+    status = models.CharField(max_length=1, choices=STATUS, default='U')
+    
+    notify_topic = models.ForeignKey(Topic, related_name='notify_topic', blank=True)
+    notify_question = models.ForeignKey(Question, related_name='notify_question', blank=True)
+    notify_reply = models.ForeignKey(Reply, related_name='notify_reply', blank=True)
+    notify_comment = models.ForeignKey(Comment, related_name='notify_comment', blank=True)
+    
+    notify_type = models.CharField(max_length=2,choices=NOTIFY_TYPE)
+
+    class Meta:
+        ordering = ['-create_date']
+          

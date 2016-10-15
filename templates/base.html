@@ -54,7 +54,11 @@
 						  <li role="presentation"><a href="/topic">话题</a></li>
 						  <li role="presentation"><a href="/explore">发现</a></li>
 						  <li role="presentation">
-						  	<a href="#" data-toggle="modal" data-target="#messageModal">消息<span class="badge">{{message_count}}</span></a>
+						  	<a href="#" data-toggle="modal" data-target="#messageModal">消息
+						  		{% if message_count > 0 %}
+						  		<span class="badge">{{message_count}}</span>
+						  		{% endif %}
+						  	</a>
 						  	<div class="modal fade" id="messageModal" tabindex="-1" role="dailog" arai-labelledby="messageLabel" aria-hidden="true">
 						  		<div class="modal-dialog">
 						  			<div class="modal-content">
