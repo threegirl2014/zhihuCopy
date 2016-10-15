@@ -9,6 +9,8 @@ from questions.models import UpDownVote,Topic
 from questions.forms import addQuestionForm, addReplyForm
 from django.shortcuts import redirect
 
+import json
+
 def getQuestionArgs(request,question_id):
     q = get_object_or_404(Question,pk=question_id)
     replies = Reply.objects.filter(question__id=question_id)
@@ -148,6 +150,23 @@ def addQuestion(request):
                 question.topics.add(topic)
             return redirect(question) 
 
+def topicSuggestion(request,max=6):
+    start = request.GET['start']
+    topics = []
+    if start:
+        topics = Topic.objects.filter(name__contains=start)
+        if max > 0 and topics.count() > max:
+            topics = topics[:max]
+    data = []
+    for topic in topics:
+        item = dict()
+        item['name'] = topic.name
+        item['topic_id'] = topic.id
+        data.append(item)
+    args = dict()
+    args['data'] = data
+    return HttpResponse(json.dumps(args))
+
 @login_required
 def addReply(request,question_id):
     if request.method == "POST":
@@ -163,3 +182,5 @@ def addReply(request,question_id):
             args['addReply'] = form
             return render(request, 'questions/question.html', args)
         
+def topicShow(request, topic_id):
+    pass

@@ -16,7 +16,7 @@ class Topic(models.Model):
         return self.name
     
     def get_absolute_url(self):
-        pass
+        return reverse('topic', kwargs={'topic_id':self.id})
     
     
     

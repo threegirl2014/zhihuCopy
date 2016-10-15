@@ -21,10 +21,10 @@
 				padding-left: 200px;
 			}
 			.modal-content{
-				height: 450px;
+				height: 580px;
 			}
 			.modal-body{
-				height: 300px;
+				height: 470px;
 			}
 			body { padding-top: 70px; }
 		</style>	
@@ -91,10 +91,17 @@
 									      <div class="modal-body">
 								      	
 									      	<textarea class="form-control" placeholder="写下你的问题" name="title" required maxlength="200"></textarea>
+									      	<hr />
 									      	<p>问题说明（可选）：</p>
 									      	<textarea class="form-control" placeholder="问题背景、条件等详细信息" name="details"></textarea>
-									      	<p>选择话题：</p>	
-									      	<textarea class="form-control" placeholder="搜索话题" name="topics"></textarea>							      	
+									      	<hr />
+									      	<p>选择话题（输入后点击标签）：</p>	
+									      	<input class="form-control" placeholder="搜索话题" name="choose_topics" id="addQuestionTopics" type="text" value="">	
+									      	<p>&nbsp;</p>					
+									      	<div id='choices'></div> 
+									      	<hr />
+									      	<p>已选择的话题：</p>					
+									      	<input class="form-control" name="topics" id="decided_topics" value="" style="display:block" required>     
 									      </div>
 									      <div class="modal-footer">
 									        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>

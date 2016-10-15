@@ -64,4 +64,57 @@ $(document).ready(function() {
 	});
 
 	$("#newQuestion").validate();
+
+	var decided_topics = new Object();
+	$('#addQuestionTopics').keyup( function(){
+		var query;
+		query = $(this).val();
+		
+		$.get('/topic_suggest/', {start:query}, function(data){
+			$('#choices').empty();
+			// console.log(data.length,typeof(data),data);
+			var topics = JSON.parse(data);
+			console.log(topics);
+			for(var i=0; i<topics['data'].length; i++){
+				var name = topics['data'][i]['name'];
+				var topic_id = topics['data'][i]['topic_id'];
+				$('#choices').append(
+					'<a class="label label-primary unchoose" topic_id="'
+					+ topic_id + '">' + name + '</a><b>&nbsp;</b>');
+			}
+
+			$('.unchoose').click( function(event){
+				$(this).attr("class","label label-success unchoose");
+				rawValue = $('#decided_topics').val().split(' ');
+				// console.log(rawValue, decided_topics);
+				for(var topic in decided_topics){
+					var flag = false;
+					for(var raw in rawValue){
+						if(decided_topics[topic] == rawValue[raw]){
+							// console.log('true', rawValue[raw], decided_topics[topic]);
+							flag = true;
+							break;
+						}
+					}
+					if(flag == false){						
+						delete decided_topics[topic];
+					}
+				}
+				// console.log(decided_topics);
+				// console.log($(this).text());
+				var topic_id = $(this).attr("topic_id");
+				var name = $(this).text();
+				decided_topics[topic_id] = name;
+				// console.log(decided_topics);
+				var names = "";
+				for(var topic in decided_topics){
+					names = names + decided_topics[topic] +" ";
+					$('#decided_topics').attr('value',names);
+					$('#decided_topics').val(names);					
+				}
+			});	
+
+		});
+
+	});
 });
