@@ -6,7 +6,9 @@ from django.db.models import Q
 # Create your views here.
 
 from zhihuuser.models import ZhihuUser
-from questions.models import UpDownVote,Topic, Notification
+from questions.models import UpDownVote,Topic, Notification,\
+    UserNotificationCounter
+from .models import createNotifications, deleteNotifications, mark_as_read
 from questions.forms import addQuestionForm, addReplyForm
 from django.shortcuts import redirect
 
@@ -68,17 +70,16 @@ def upVoteAnswer(request):
             if reply.votepeoples.filter(pk=user.id).exists():
                 updownvote = UpDownVote.objects.get(reply=reply, voteman=user)
                 if updownvote.opinions == 'D':
-#                     reply.down_vote = reply.down_vote - 1
-#                     reply.up_vote = reply.up_vote + 1
                     updownvote.opinions = 'U'
-                    updownvote.save()                  
+                    updownvote.save()
+                    createNotifications(from_user=user, to_user=reply.author, notify_type='U', question=reply.question, reply=reply)                  
                 else:
                     updownvote.delete()
-#                     reply.up_vote = reply.up_vote - 1                            
+                    deleteNotifications(from_user=user, to_user=reply.author, notify_type='U', question=reply.question, reply=reply)                          
             else:
                 newVote = UpDownVote(reply=reply, voteman=user, opinions='U')
                 newVote.save()
-#                 reply.up_vote = reply.up_vote + 1
+                createNotifications(from_user=user, to_user=reply.author, notify_type='U', question=reply.question, reply=reply)
             #the method below can avoid some confilicts about different user's vote
             reply.up_vote = UpDownVote.objects.filter(reply=reply, opinions='U').count()
             reply.down_vote = UpDownVote.objects.filter(reply=reply, opinions='D').count()
@@ -99,17 +100,14 @@ def downVoteAnswer(request):
             if reply.votepeoples.filter(pk=user.id).exists():
                 updownvote = UpDownVote.objects.get(reply=reply, voteman=user)
                 if updownvote.opinions == 'U':
-#                     reply.down_vote = reply.down_vote + 1
-#                     reply.up_vote = reply.up_vote - 1
                     updownvote.opinions = 'D'
                     updownvote.save()
+                    deleteNotifications(from_user=user, to_user=reply.author, notify_type='U', question=reply.question, reply=reply)                                              
                 else:
                     updownvote.delete()
-#                     reply.down_vote = reply.down_vote - 1
             else:
                 newVote = UpDownVote(reply=reply, voteman=user, opinions='D')
                 newVote.save()
-#                 reply.down_vote = reply.down_vote + 1
             reply.up_vote = UpDownVote.objects.filter(reply=reply, opinions='U').count()
             reply.down_vote = UpDownVote.objects.filter(reply=reply, opinions='D').count()
             reply.save()
@@ -186,11 +184,20 @@ def addReply(request,question_id):
 def topicShow(request, topic_id):
     pass
 
-@login_required    
-def getMessageList(request):
-    zhihuuser = request.user.zhihuuser
-    notifies = Notification.objects.filter(notify_to_user__id=zhihuuser.id)
-    f_notifies = notifies.filter(notify_type='F')
-    u_t_notifies = notifies.filter( Q(notify_typ='U') | Q(notify_type='T'))
-    rq_rf_notifies = notifies.filter( Q(notify_type='RQ') | Q(notify_type='RF') )
-    return HttpResponse(locals())    
+@login_required
+def markAllMessage(request):
+    user = request.user.zhihuuser
+    mark_as_read(user)
+    data = UserNotificationCounter.objects.get(pk=user.id,has_read=True).count
+    return HttpResponse(data)
+
+# @login_required    
+# def getMessageList(request):
+#     zhihuuser = request.user.zhihuuser
+#     notifies = Notification.objects.filter(notify_to_user__id=zhihuuser.id)
+#     f_notifies = notifies.filter(notify_type='F')
+#     u_uc_t_notifies = notifies.filter( Q(notify_typ='U') | Q(notify_typ='UC') |Q(notify_type='T'))
+#     rq_rf_notifies = notifies.filter( Q(notify_type='RQ') | Q(notify_type='RF') )
+#     return HttpResponse(locals())  
+
+  

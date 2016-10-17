@@ -10,7 +10,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
    
-from questions.models import Notification
+from questions.models import Notification, UserNotificationCounter
 
 
 # Create your views here. 
@@ -72,12 +72,14 @@ def weblogin(request):
 def home(request):
     if request.user.is_authenticated():
         zhihuuser = request.user.zhihuuser
-        notifies = Notification.objects.filter(notify_to_user__id=zhihuuser.id).filter( Q(notify_type='RF') | Q(notify_type='UF') | Q(notify_type='IF') )
+        notify_from_followee = Notification.objects.filter(notify_to_user__id=zhihuuser.id).filter( Q(notify_type='RF') | Q(notify_type='UF') | Q(notify_type='IF') )
+        messages = Notification.objects.filter(notify_to_user__id=zhihuuser.id)
         args = dict()
         args['zhihuuser'] = zhihuuser
         args['user'] = zhihuuser.user
-        args['notifies'] = notifies
-        args['message_count'] = notifies.filter(status='U').count()
+        args['notifies_from_followee'] = notify_from_followee
+        args['messages'] = messages
+        args['message_count'] = UserNotificationCounter.objects.get(pk=zhihuuser.id).unread_count 
         return render(request,"zhihuuser/home.html",args)
     else:
         args = dict()

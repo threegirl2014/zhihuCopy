@@ -117,4 +117,12 @@ $(document).ready(function() {
 		});
 
 	});
+
+	$('#messages').click( function(event){
+		$('#messagecount').html('');
+		$.get('/mark/', function(data){
+			
+		});
+	});
+
 });

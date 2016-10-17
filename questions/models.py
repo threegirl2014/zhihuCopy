@@ -2,6 +2,9 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.core.urlresolvers import reverse
+from django.dispatch.dispatcher import receiver
+from django.db.models.signals import post_save, post_delete
+from django.db.models import F
 
 # Create your models here.
 
@@ -78,13 +81,10 @@ class UpDownVote(models.Model):
     opinions = models.CharField(max_length=1, choices=OPINIONS,blank=True) 
     
 class Notification(models.Model):
-    STATUS = (
-              ('R','read'),
-              ('U','unread'),
-              )
     NOTIFY_TYPE = (
                    ('F','follower'),
                    ('U','upvote'),
+                   ('UC','upvoteComment'),
                    ('T','thanks'),
                    ('C','comment'),
                    ('RQ','replyFromQuestion'),
@@ -95,15 +95,129 @@ class Notification(models.Model):
     create_date = models.DateTimeField(auto_now_add=True)
     notify_from_user = models.ForeignKey('zhihuuser.ZhihuUser', related_name='notify_from_user')
     notify_to_user = models.ForeignKey('zhihuuser.ZhihuUser', related_name='notify_to_user')
-    status = models.CharField(max_length=1, choices=STATUS, default='U')
+    has_read = models.BooleanField(default=False)
     
-    notify_topic = models.ForeignKey(Topic, related_name='notify_topic', blank=True)
-    notify_question = models.ForeignKey(Question, related_name='notify_question', blank=True)
-    notify_reply = models.ForeignKey(Reply, related_name='notify_reply', blank=True)
-    notify_comment = models.ForeignKey(Comment, related_name='notify_comment', blank=True)
+#     notify_topic = models.ForeignKey(Topic, related_name='notify_topic', blank=True)
+    notify_question = models.ForeignKey(Question, related_name='notify_question', blank=True, null=True)
+    notify_reply = models.ForeignKey(Reply, related_name='notify_reply', blank=True, null=True)
+    notify_comment = models.ForeignKey(Comment, related_name='notify_comment', blank=True, null=True)
     
     notify_type = models.CharField(max_length=2,choices=NOTIFY_TYPE)
 
     class Meta:
         ordering = ['-create_date']
-          
+    
+    def __unicode__(self):
+        return self.notify_type
+
+class UserNotificationCounter(models.Model):
+    user_id = models.IntegerField(primary_key=True)
+    unread_count = models.IntegerField(default=0)
+    
+    def __unicode__(self):
+        return "user unread notifications count: id={0},count={1}".format(self.user_id, self.unread_count)
+
+    
+def createNotifications(from_user,to_user,notify_type,topic=None,question=None,reply=None,comment=None):
+    if notify_type == 'F':
+        Notification.objects.create(
+                            notify_from_user=from_user,
+                            notify_to_user=to_user,
+                            notify_type=notify_type,
+                            )
+    elif notify_type == 'U' or notify_type == 'T':
+        Notification.objects.create(
+                            notify_from_user=from_user,
+                            notify_to_user=to_user,
+                            notify_type=notify_type,
+                            notify_question=question,
+                            notify_reply=reply,                            
+                            )
+    elif notify_type == 'UC' or notify_type == 'C':
+        Notification.objects.create(
+                            notify_from_user=from_user,
+                            notify_to_user=to_user,
+                            notify_type=notify_type,
+                            notify_topic=topic,
+                            notify_question=question,
+                            notify_reply=reply, 
+                            notify_comment=comment,                           
+                            )    
+    elif notify_type == 'RQ' or notify_type == 'RF' \
+      or notify_type == 'UF' or notify_type == 'IF':
+        for user in to_user:
+            Notification.objects.create(
+                                notify_from_user=from_user,
+                                notify_to_user=user,
+                                notify_type=notify_type,
+                                notify_question=question,
+                                notify_reply=reply,                            
+                                )            
+
+def deleteNotifications(from_user,to_user,notify_type,topic=None,question=None,reply=None,comment=None):
+    if notify_type == 'F':
+        notification = Notification.objects.get(
+                            notify_from_user=from_user,
+                            notify_to_user=to_user,
+                            notify_type=notify_type,                                                
+                                            )
+        notification.delete()
+    elif notify_type == 'U' or notify_type == 'T':
+        notification = Notification.objects.get(
+                            notify_from_user=from_user,
+                            notify_to_user=to_user,
+                            notify_type=notify_type, 
+                            notify_question=question,
+                            notify_reply=reply,                                                
+                                            )
+        notification.delete()
+    elif notify_type == 'UC' or notify_type == 'C':
+        notification = Notification.objects.get(
+                            notify_from_user=from_user,
+                            notify_to_user=to_user,
+                            notify_type=notify_type,
+                            notify_topic=topic,
+                            notify_question=question,
+                            notify_reply=reply, 
+                            notify_comment=comment,                           
+                            )
+        notification.delete()             
+    elif notify_type == 'RQ' or notify_type == 'RF' \
+      or notify_type == 'UF' or notify_type == 'IF':
+        for user in to_user:
+            notification = Notification.objects.get(
+                                notify_from_user=from_user,
+                                notify_to_user=user,
+                                notify_type=notify_type,
+                                notify_question=question,
+                                notify_reply=reply,                            
+                                ) 
+            notification.delete()
+            
+def update_unread_count(user_id,count):
+    UserNotificationCounter.objects.filter(pk=user_id).update(unread_count = F('unread_count') + count)
+
+@receiver(post_save,sender=Notification)
+def incr_notifications_counter(instance,created,**kwargs):
+    print 'CREATE: ',instance.notify_from_user,instance.notify_to_user,instance.notify_type
+    if created and not instance.has_read:
+        update_unread_count(instance.notify_to_user.id, 1)
+    else:
+        return 
+    
+@receiver(post_delete,sender=Notification)
+def decr_notifications_counter(instance,**kwargs): 
+    print 'DELETE: ',instance.notify_from_user,instance.notify_to_user,instance.notify_type
+    if not instance.has_read:
+        update_unread_count(instance.notify_to_user.id, -1)
+    else:
+        return 
+    
+def mark_as_read(user,notification_id=None):
+    if notification_id == None:
+        print 'MARK ALL: ', user
+        rows = Notification.objects.filter(notify_to_user=user,has_read=False).update(has_read=True)
+    else:
+        print 'MARK ONE: ', notification_id
+        rows = Notification.objects.filter(pk=notification_id,has_read=False).update(has_read=True)
+    update_unread_count(user.id, 0-rows)             

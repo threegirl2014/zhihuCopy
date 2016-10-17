@@ -2,6 +2,10 @@ from __future__ import unicode_literals
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.dispatch.dispatcher import receiver
+from django.db.models.signals import post_save
+from questions.models import UserNotificationCounter
+from django.core.urlresolvers import reverse
 
 # Create your models here.
 
@@ -42,6 +46,14 @@ class ZhihuUser(models.Model):
     def __unicode__(self):
         return self.user.username
     
+    def get_absolute_url(self):
+        return reverse('people',kwargs={'name':self.user.username})
+    
     def save(self,*args,**kwargs):
         
         super(ZhihuUser,self).save(*args,**kwargs)
+        
+@receiver(post_save,sender=ZhihuUser)
+def createUserNotificationCounter(instance,created,**kwargs):
+    if created:
+        UserNotificationCounter.objects.create(pk=instance.id)

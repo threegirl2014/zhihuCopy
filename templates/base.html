@@ -26,6 +26,10 @@
 			.modal-body{
 				height: 470px;
 			}
+			.list{
+				padding-left: 1px;
+				padding-right: 1px;
+			}
 			body { padding-top: 70px; }
 		</style>	
 	</head>
@@ -54,9 +58,9 @@
 						  <li role="presentation"><a href="/topic">话题</a></li>
 						  <li role="presentation"><a href="/explore">发现</a></li>
 						  <li role="presentation">
-						  	<a href="#" data-toggle="modal" data-target="#messageModal">消息
+						  	<a href="#" data-toggle="modal" data-target="#messageModal" id="messages">消息
 						  		{% if message_count > 0 %}
-						  		<span class="badge">{{message_count}}</span>
+						  		<span class="badge" id="messagecount">{{message_count}}</span>
 						  		{% endif %}
 						  	</a>
 						  	<div class="modal fade" id="messageModal" tabindex="-1" role="dailog" arai-labelledby="messageLabel" aria-hidden="true">
@@ -71,7 +75,29 @@
   											<div class="tab-content">
 											    <div role="tabpanel" class="tab-pane active" id="commonMessage">消息</div>
 											    <div role="tabpanel" class="tab-pane" id="uerMessage">用户</div>
-											    <div role="tabpanel" class="tab-pane" id="thanksMessage">赞同和感谢</div>
+											    <div role="tabpanel" class="tab-pane " id="thanksMessage">
+											    	<ul class="list group">
+											    		{% for notify in messages %}
+											    		{% if notify.notify_type == 'U' %}
+											    			{% if notify.has_read %}
+											    		<li class="list-group-item">
+											    			{% else %}
+											    		<li class="list-group-item list-group-item-info">
+											    			{% endif %}
+											    			获得 1 次赞同： <a href="{{notify.notify_question.get_absolute_url}}">{{notify.notify_question}} </a>来自<a href="{{notify.notify_from_user.get_absolute_url}}"> {{notify.notify_from_user.fullname}} </a>
+											    		</li>
+											    		{% elif notify.notify_type == 'T' %}
+											    			{% if notify.has_read %}
+											    		<li class="list-group-item">
+											    			{% else %}
+											    		<li class="list-group-item list-group-item-info">
+											    			{% endif %}
+											    			获得 1 次感谢： <a href="{{notify.notify_question.get_absolute_url}}">{{notify.notify_question}} </a>来自<a href="{{notify.notify_from_user.get_absolute_url}}"> {{notify.notify_from_user.fullname}} </a>
+											    		</li>					
+											    		{% endif %}
+											    		{% endfor %}
+											    	</ul>
+											    </div>
 											</div>
 						  				</div>
 						  			</div>
