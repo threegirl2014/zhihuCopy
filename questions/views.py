@@ -188,7 +188,7 @@ def topicShow(request, topic_id):
 def markAllMessage(request):
     user = request.user.zhihuuser
     mark_as_read(user)
-    data = UserNotificationCounter.objects.get(pk=user.id,has_read=True).count
+    data = UserNotificationCounter.objects.get(pk=user.id).unread_count
     return HttpResponse(data)
 
 # @login_required    

@@ -6,6 +6,7 @@ from django.dispatch.dispatcher import receiver
 from django.db.models.signals import post_save, post_delete
 from django.db.models import F
 
+from django_redis import get_redis_connection
 # Create your models here.
 
 
@@ -193,9 +194,14 @@ def deleteNotifications(from_user,to_user,notify_type,topic=None,question=None,r
                                 notify_reply=reply,                            
                                 ) 
             notification.delete()
-            
+
+
+RK_NOTIFICATIONS_COUNTER = 'redis_pending_counter_changes'            
 def update_unread_count(user_id,count):
-    UserNotificationCounter.objects.filter(pk=user_id).update(unread_count = F('unread_count') + count)
+#     UserNotificationCounter.objects.filter(pk=user_id).update(unread_count = F('unread_count') + count)
+    con = get_redis_connection('default')
+    con.zincrby(RK_NOTIFICATIONS_COUNTER, str(user_id), count)
+
 
 @receiver(post_save,sender=Notification)
 def incr_notifications_counter(instance,created,**kwargs):
