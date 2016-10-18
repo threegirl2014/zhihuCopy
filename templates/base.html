@@ -68,35 +68,15 @@
 						  			<div class="modal-content">
 						  				<div class="modal-body">
 						  					<ul class="nav nav-tabs nav-justified" role="tablist">
-						  						<li role="presentation" class="active"><a href="#commonMessage" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-list"></span></a></li>
-						  						<li role="presentation"><a href="#uerMessage" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-user"></span></a></li>
-  												<li role="presentation"><a href="#thanksMessage" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-heart"></span></a></li>
+						  						<li role="presentation" id="commonMessageTab" class="active"><a href="#commonMessage" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-list"></span></a></li>
+						  						<li role="presentation" id="userMessageTab"><a href="#uerMessage" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-user"></span></a></li>
+  												<li role="presentation" id="thanksMessageTab"><a href="#thanksMessage" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-heart"></span></a></li>
   											</ul>
   											<div class="tab-content">
 											    <div role="tabpanel" class="tab-pane active" id="commonMessage">消息</div>
 											    <div role="tabpanel" class="tab-pane" id="uerMessage">用户</div>
 											    <div role="tabpanel" class="tab-pane " id="thanksMessage">
-											    	<ul class="list group">
-											    		{% for notify in messages %}
-											    		{% if notify.notify_type == 'U' %}
-											    			{% if notify.has_read %}
-											    		<li class="list-group-item">
-											    			{% else %}
-											    		<li class="list-group-item list-group-item-info">
-											    			{% endif %}
-											    			获得 1 次赞同： <a href="{{notify.notify_question.get_absolute_url}}">{{notify.notify_question}} </a>来自<a href="{{notify.notify_from_user.get_absolute_url}}"> {{notify.notify_from_user.fullname}} </a>
-											    		</li>
-											    		{% elif notify.notify_type == 'T' %}
-											    			{% if notify.has_read %}
-											    		<li class="list-group-item">
-											    			{% else %}
-											    		<li class="list-group-item list-group-item-info">
-											    			{% endif %}
-											    			获得 1 次感谢： <a href="{{notify.notify_question.get_absolute_url}}">{{notify.notify_question}} </a>来自<a href="{{notify.notify_from_user.get_absolute_url}}"> {{notify.notify_from_user.fullname}} </a>
-											    		</li>					
-											    		{% endif %}
-											    		{% endfor %}
-											    	</ul>
+
 											    </div>
 											</div>
 						  				</div>

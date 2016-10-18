@@ -73,12 +73,12 @@ def home(request):
     if request.user.is_authenticated():
         zhihuuser = request.user.zhihuuser
         notify_from_followee = Notification.objects.filter(notify_to_user__id=zhihuuser.id).filter( Q(notify_type='RF') | Q(notify_type='UF') | Q(notify_type='IF') )
-        messages = Notification.objects.filter(notify_to_user__id=zhihuuser.id)
+#         messages = Notification.objects.filter(notify_to_user__id=zhihuuser.id)
         args = dict()
         args['zhihuuser'] = zhihuuser
         args['user'] = zhihuuser.user
         args['notifies_from_followee'] = notify_from_followee
-        args['messages'] = messages
+#         args['messages'] = messages
         args['message_count'] = UserNotificationCounter.objects.get(pk=zhihuuser.id).unread_count 
         return render(request,"zhihuuser/home.html",args)
     else:

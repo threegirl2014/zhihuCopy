@@ -123,6 +123,25 @@ $(document).ready(function() {
 		$.get('/mark/', function(data){
 			
 		});
+		$.get('/messagelist/', {messageType:"common"}, function(data){
+			$('#commonMessage').html(data);
+		});
 	});
 
+	$('#thanksMessageTab').click( function(event){
+		$.get('/messagelist/', {messageType:"thanks"}, function(data){
+			// console.log(data);
+			$('#thanksMessage').html(data);
+		});
+	});
+	$('#userMessageTab').click( function(event){
+		$.get('/messagelist/', {messageType:"user"}, function(data){
+			$('#uerMessage').html(data);
+		});
+	});
+	$('#commonMessageTab').click( function(event){
+		$.get('/messagelist/', {messageType:"common"}, function(data){
+			$('#commonMessage').html(data);
+		});
+	});
 });

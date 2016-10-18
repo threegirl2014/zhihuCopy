@@ -1,0 +1,21 @@
+<ul class="list group">
+	{% for notify in messages %}
+	{% if notify.notify_type == 'U' %}
+		{% if notify.has_read %}
+	<li class="list-group-item">
+		{% else %}
+	<li class="list-group-item list-group-item-info">
+		{% endif %}
+		获得 1 次赞同： <a href="{{notify.notify_question.get_absolute_url}}">{{notify.notify_question}} </a>来自<a href="{{notify.notify_from_user.get_absolute_url}}"> {{notify.notify_from_user.fullname}} </a>
+	</li>
+	{% elif notify.notify_type == 'T' %}
+		{% if notify.has_read %}
+	<li class="list-group-item">
+		{% else %}
+	<li class="list-group-item list-group-item-info">
+		{% endif %}
+		获得 1 次感谢： <a href="{{notify.notify_question.get_absolute_url}}">{{notify.notify_question}} </a>来自<a href="{{notify.notify_from_user.get_absolute_url}}"> {{notify.notify_from_user.fullname}} </a>
+	</li>					
+	{% endif %}
+	{% endfor %}
+</ul>

@@ -3,6 +3,7 @@ from .models import Question, Reply, Comment
 from django.contrib.auth.decorators import login_required
 from django.http.response import HttpResponse
 from django.db.models import Q
+from django.core.cache import cache
 # Create your views here.
 
 from zhihuuser.models import ZhihuUser
@@ -48,8 +49,8 @@ def getQuestionArgs(request,question_id):
     else:
         args['hasReplied'] = False
 
-    messages = Notification.objects.filter(notify_to_user__id=zhihuuser.id)
-    args['messages'] = messages
+#     messages = Notification.objects.filter(notify_to_user__id=zhihuuser.id)
+#     args['messages'] = messages
     args['message_count'] = UserNotificationCounter.objects.get(pk=zhihuuser.id).unread_count 
     
     return args
@@ -195,13 +196,42 @@ def markAllMessage(request):
     data = UserNotificationCounter.objects.get(pk=user.id).unread_count
     return HttpResponse(data)
 
-# @login_required    
-# def getMessageList(request):
-#     zhihuuser = request.user.zhihuuser
-#     notifies = Notification.objects.filter(notify_to_user__id=zhihuuser.id)
-#     f_notifies = notifies.filter(notify_type='F')
-#     u_uc_t_notifies = notifies.filter( Q(notify_typ='U') | Q(notify_typ='UC') |Q(notify_type='T'))
-#     rq_rf_notifies = notifies.filter( Q(notify_type='RQ') | Q(notify_type='RF') )
-#     return HttpResponse(locals())  
+MESSAGE_TIMEOUT= 60 * 5
+
+@login_required    
+def getMessageList(request):
+    messageType = None
+    if request.method == 'GET':
+        messageType = request.GET['messageType']
+        args = dict()
+        zhihuuser = request.user.zhihuuser
+        messages = Notification.objects.filter(notify_to_user__id=zhihuuser.id)
+        args['messages'] = messages
+        
+        if messageType == 'thanks':
+            if cache.get('thanksmessage') == None:
+                print 'thanks messages are generating...'
+                response = render(request,'thanksmessage.html',args)
+                cache.set('thanksmessage', response, MESSAGE_TIMEOUT)
+            else:
+                print 'get thanks messages from cache'
+            return cache.get('thanksmessage')
+        elif messageType == 'user':
+            if cache.get('usermessage') == None:
+                print 'user messages are generating...'
+                response = render(request,'usermessage.html',args) 
+                cache.set('usermessage', response, MESSAGE_TIMEOUT) 
+            else:
+                print 'get user messages from cache'
+            return cache.get('usermessage')
+        elif messageType == 'common':
+            if cache.get('commonmessage') == None:
+                print 'user messages are generating...'
+                response = render(request,'commonmessage.html',args) 
+                cache.set('commonmessage', response, MESSAGE_TIMEOUT)                 
+            else:
+                print 'get common messages from cache'
+            return cache.get('commonmessage')
+     
 
   
