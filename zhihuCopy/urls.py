@@ -43,4 +43,7 @@ urlpatterns = [
     
     url(r'^mark/$', questionsViews.markAllMessage, name='mark'),
     url(r'^messagelist/$', questionsViews.getMessageList, name='messageList'),
+    
+    url(r'^follow/$', zhihuuserViews.modify_follow, name='modifyFollow'),
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -11,7 +11,8 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
    
 from questions.models import Notification, UserNotificationCounter
-
+from questions.models import createNotifications, deleteNotifications
+from django.http.response import HttpResponse
 
 # Create your views here. 
 
@@ -87,20 +88,42 @@ def home(request):
         args['login_email_form'] = LoginForm()
         return render(request,"zhihuuser/not_logged_in.html",args)
 
-# @login_required
+@login_required
 def people(request,name):
-    user = User.objects.get(username=name)
-    zhihuuser = ZhihuUser.objects.get(user=user)
+    stranger = ZhihuUser.objects.get(user__username=name)
+    zhihuuser = request.user.zhihuuser
     args = dict()
+    isfollow = True if zhihuuser.followees.filter(pk=stranger.id).exists() else False
     args['zhihuuser'] = zhihuuser
-    args['user'] = user
+    args['stranger'] = stranger
+    args['isfollow'] = isfollow
     return render(request,"zhihuuser/people.html",args)
 
 def weblogout(request):
     logout(request)
     return redirect('/')
 
-
+@login_required
+def modify_follow(request):
+    if request.method == 'GET':
+        flag = request.GET['flag']
+        followee_id = request.GET['followee_id']
+        follower_id = request.user.zhihuuser.id
+        if followee_id:
+            followee = ZhihuUser.objects.get(pk=followee_id)
+            follower = ZhihuUser.objects.get(pk=follower_id)
+            if flag == 'add':
+                print 'add followee'
+                follower.followees.add(followee)
+                followee.followers.add(follower)
+                createNotifications(from_user=follower,to_user=followee,notify_type='F')
+            elif flag == 'del':
+                print 'del followee'
+                follower.followees.remove(followee)
+                followee.followers.remove(follower)
+                deleteNotifications(from_user=follower,to_user=followee,notify_type='F')
+            return HttpResponse('success follow')
+        
 def show_asks(request,name):
     pass
 

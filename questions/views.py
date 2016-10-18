@@ -196,7 +196,7 @@ def markAllMessage(request):
     data = UserNotificationCounter.objects.get(pk=user.id).unread_count
     return HttpResponse(data)
 
-MESSAGE_TIMEOUT= 60 * 5
+MESSAGE_TIMEOUT= 60
 
 @login_required    
 def getMessageList(request):
@@ -226,7 +226,7 @@ def getMessageList(request):
             return cache.get('usermessage')
         elif messageType == 'common':
             if cache.get('commonmessage') == None:
-                print 'user messages are generating...'
+                print 'common messages are generating...'
                 response = render(request,'commonmessage.html',args) 
                 cache.set('commonmessage', response, MESSAGE_TIMEOUT)                 
             else:

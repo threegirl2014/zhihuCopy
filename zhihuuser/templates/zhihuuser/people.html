@@ -2,11 +2,28 @@
 {% load static %}
 
 {% block title %}
-	{{ zhihuuser.fullname }} - 知乎
+	{{ stranger.fullname }} - 知乎
 {% endblock title %}
 
 {% block main %}
-<div class="zg-wrap zu-main clearfix " role="main">
+{% if zhihuuser.id != stranger.id %}
+<div>
+	<div class="btn-group" role="group">
+	{% if isfollow %}
+	<button type="button" class="btn" id="followpeople" data-peopleid="{{stranger.id}}">
+		取消关注
+	</button>
+	{% else %}
+	<button type="button" class="btn btn-success" id="followpeople" data-peopleid="{{stranger.id}}">
+		关注
+	</button>					
+	{% endif %}
+</div>
+{% endif %}
+</div>
+
+
+<!-- <div class="zg-wrap zu-main clearfix " role="main">
 	<div class="zu-main-content">
 		<div class="zu-main-content-inner">
 			<div class="zm-profile-header ProfileCard">
@@ -17,16 +34,12 @@
 							<span class="ProfileAvatarEditor-tip">修改头像</span>
 							<span class="ProfileAvatarEditor-spinner Spinner"></span>
 						</div>
-						<!-- <form target="av_up_frame" style="display:none;" method="post" enctype="multipart/form-data" action="https://upload.zhihu.com:/upload_avatar"><label for="avt_file"></label><input type="file" accept="image/*" name="picture" id="avt_file"><input type="hidden" name="handle_mode" value="upload"><input type="hidden" name="type" value="1"><input type="hidden" name="dest_id" value="12c62a4f2d41b6fc3c3c28b6cc76e74c"><input type="hidden" name="return_size" value="l"></form> -->
 						<div class="top">
 							<div class="title-section">
 								<span class="name">{{ zhihuuser.fullname }}</span>
 								<a class="icon-badge-wrapper" href="#"></a>
 							</div>
 						</div>
-
-						{% include 'zhihuuser/header-info.html' %}
-
 					</div>
 				</div>
 				<div class="zm-profile-header-operation zg-clear  zm-profile-header-operation-myview">
@@ -106,5 +119,5 @@
 		<script type="text/json" class="json-inline" data-name="current_people"></script>
 		{% include 'footer.html' %}				
 	</div>
-</div>
+</div> -->
 {% endblock main %}

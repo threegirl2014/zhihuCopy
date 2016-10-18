@@ -144,4 +144,24 @@ $(document).ready(function() {
 			$('#commonMessage').html(data);
 		});
 	});
+
+	$('#followpeople').click( function(event){
+		var add_or_del;
+		var isfollow = $(this).attr("class");
+		if(isfollow == 'btn'){
+			add_or_del = 'del';
+		}else if(isfollow == 'btn btn-success'){
+			add_or_del = 'add';
+		}
+		var followeeid = $(this).attr("data-peopleid");
+		$.get('/follow/', {flag:add_or_del,followee_id:followeeid}, function(data){
+			if(add_or_del == 'add'){
+				$('#followpeople').attr("class", "btn");
+				$('#followpeople').html("取消关注");
+			}else if(add_or_del == 'del'){
+				$('#followpeople').attr("class", "btn btn-success");
+				$('#followpeople').html("关注");
+			}
+		});
+	});
 });
