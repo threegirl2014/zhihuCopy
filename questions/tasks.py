@@ -1,0 +1,19 @@
+from __future__ import absolute_import
+from celery import shared_task
+from django_redis import get_redis_connection
+from questions.models import UserNotificationCounter,RK_NOTIFICATIONS_COUNTER
+from django.db.models import F
+
+@shared_task
+def update_counter():
+    con = get_redis_connection('default')
+    for user_id in con.zrange(RK_NOTIFICATIONS_COUNTER,0,-1):
+        pipe = con.pipeline()
+        pipe.zscore(RK_NOTIFICATIONS_COUNTER,user_id)
+        pipe.zrem(RK_NOTIFICATIONS_COUNTER,user_id)
+        count,_ = pipe.execute()
+        count = int(count)
+        
+        print 'Updating unread count user {0}: count {1}'.format(user_id, count) 
+        UserNotificationCounter.objects.filter(pk=user_id).update(unread_count = F('unread_count') + count)
+        return user_id, count

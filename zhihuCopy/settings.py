@@ -161,3 +161,21 @@ CACHES = {
 REDIS_TIMEOUT=7*24*60*60
 CUBES_REDIS_TIMEOUT=60*60
 NEVER_REDIS_TIMEOUT=365*24*60*60
+
+BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND='redis://localhost:6379/0'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TASK_RESULT_EXPIRES = 60 * 60 * 24
+CELERY_ACCEPT_CONTENT = ['json']
+
+from datetime import timedelta
+CELERYBEAT_SCHEDULE = {
+    'update_counter': {
+
+        'task': 'questions.tasks.update_counter',
+
+       'schedule': timedelta(seconds=60),
+
+    }
+}
