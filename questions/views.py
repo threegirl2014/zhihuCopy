@@ -47,6 +47,10 @@ def getQuestionArgs(request,question_id):
         args['hasReplied'] = True
     else:
         args['hasReplied'] = False
+
+    messages = Notification.objects.filter(notify_to_user__id=zhihuuser.id)
+    args['messages'] = messages
+    args['message_count'] = UserNotificationCounter.objects.get(pk=zhihuuser.id).unread_count 
     
     return args
 
