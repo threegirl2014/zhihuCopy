@@ -196,7 +196,7 @@ def markAllMessage(request):
     data = UserNotificationCounter.objects.get(pk=user.id).unread_count
     return HttpResponse(data)
 
-MESSAGE_TIMEOUT= 60
+MESSAGE_TIMEOUT= 60 * 5
 
 @login_required    
 def getMessageList(request):
