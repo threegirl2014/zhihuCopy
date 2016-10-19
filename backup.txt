@@ -1,0 +1,5 @@
+use Chinese should create database like:
+create database database_name default character set utf8 collate utf8_general_ci
+
+act the Beat and Worker both:
+celery -B -A zhihuCopy Worker -l info 
