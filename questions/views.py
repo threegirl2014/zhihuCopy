@@ -14,6 +14,7 @@ from questions.forms import addQuestionForm, addReplyForm
 from django.shortcuts import redirect
 
 import json
+from scipy.constants.constants import mega
 
 def getQuestionArgs(request,question_id):
     q = get_object_or_404(Question,pk=question_id)
@@ -77,14 +78,23 @@ def upVoteAnswer(request):
                 if updownvote.opinions == 'D':
                     updownvote.opinions = 'U'
                     updownvote.save()
+                    #upvote notification to reply author
                     createNotifications(from_user=user, to_user=reply.author, notify_type='U', question=reply.question, reply=reply)                  
+                    #upvote notificaiton from VIP
+                    createNotifications(from_user=user, to_user=user.followers.all(), notify_type='UF', question=reply.question, reply=reply)
                 else:
                     updownvote.delete()
+                    #upvote notification to reply author
                     deleteNotifications(from_user=user, to_user=reply.author, notify_type='U', question=reply.question, reply=reply)                          
+                    #upvote notificaiton from VIP
+                    deleteNotifications(from_user=user, to_user=user.followers.all(), notify_type='UF', question=reply.question, reply=reply)
             else:
                 newVote = UpDownVote(reply=reply, voteman=user, opinions='U')
                 newVote.save()
+                #upvote notification to reply author
                 createNotifications(from_user=user, to_user=reply.author, notify_type='U', question=reply.question, reply=reply)
+                #upvote notificaiton from VIP
+                createNotifications(from_user=user, to_user=user.followers.all(), notify_type='UF', question=reply.question, reply=reply)
             #the method below can avoid some confilicts about different user's vote
             reply.up_vote = UpDownVote.objects.filter(reply=reply, opinions='U').count()
             reply.down_vote = UpDownVote.objects.filter(reply=reply, opinions='D').count()
@@ -107,7 +117,10 @@ def downVoteAnswer(request):
                 if updownvote.opinions == 'U':
                     updownvote.opinions = 'D'
                     updownvote.save()
+                    #upvote notification to reply author
                     deleteNotifications(from_user=user, to_user=reply.author, notify_type='U', question=reply.question, reply=reply)                                              
+                    #upvote notificaiton from VIP
+                    deleteNotifications(from_user=user, to_user=user.followers.all(), notify_type='UF', question=reply.question, reply=reply)
                 else:
                     updownvote.delete()
             else:
@@ -132,10 +145,14 @@ def followQuestion(request):
             user.questions.remove(q)
             q.followers_count = q.followers_count - 1
             print '>>>>>>>>>del: ', q.followers_count
+            #interest Notification from VIP
+            deleteNotifications(from_user=user, to_user=user.followers.all(), notify_type='IF', question=q)
         else:
             user.questions.add(q)
             q.followers_count = q.followers_count + 1
             print '>>>>>>>>>add: ', q.followers_count
+            #interest question Notification from VIP
+            createNotifications(from_user=user, to_user=user.followers.all(), notify_type='IF', question=q)
         q.save()
     return HttpResponse(q.followers_count)
 
@@ -152,6 +169,8 @@ def addQuestion(request):
             for item in topics.split(' '):
                 topic = Topic.objects.get(name=item)
                 question.topics.add(topic)
+            #create question Notification from VIP
+            createNotifications(from_user=user, to_user=user.followers.all(), notify_type='CF', question=question)
             return redirect(question) 
 
 def topicSuggestion(request,max=6):
@@ -180,6 +199,10 @@ def addReply(request,question_id):
             user = request.user.zhihuuser
             question = Question.objects.get(pk=question_id)
             reply = Reply.objects.create(author=user, details=details, question=question)
+            #create reply Notification from question
+            createNotifications(from_user=user, to_user=question.followers.all(), notify_type='RQ', question=question, reply=reply)
+            #create reply Notification from VIP
+            createNotifications(from_user=user, to_user=user.followers.all(), notify_type='RF', question=question, reply=reply)
             return redirect(question)
         else:
             args = getQuestionArgs(request, question_id)
@@ -192,11 +215,99 @@ def topicShow(request, topic_id):
 @login_required
 def markAllMessage(request):
     user = request.user.zhihuuser
-    mark_as_read(user)
+#     mark_as_read(user)
     data = UserNotificationCounter.objects.get(pk=user.id).unread_count
     return HttpResponse(data)
 
-MESSAGE_TIMEOUT= 60 * 5
+def clean_thanksmessages(user,raw_messages):
+    u_messages = {}
+    t_messages = {}
+    for item in raw_messages:
+        question_id = item.notify_question.id
+        question_url = item.notify_question.get_absolute_url()
+        question_title = item.notify_question.title
+        user_name = item.notify_from_user.fullname
+        user_url = item.notify_from_user.get_absolute_url()
+        notify_type = item.notify_type
+        has_read = item.has_read
+        data = (question_url, user_name, user_url, notify_type, has_read,question_title)
+        if notify_type == 'U':
+            if u_messages.has_key(question_id):          
+                u_messages[question_id].append(data)
+            else:
+                u_messages[question_id] = [data,]
+        elif notify_type == 'T':
+            if t_messages.has_key(question_id):          
+                t_messages[question_id].append(data)
+            else:
+                t_messages[question_id] = [data,]
+    
+    def messages_merge(a,b):
+        for item in b:
+            l = len(b[item])
+            message = {'question_id': item,
+                       'question_url': b[item][0][0],
+                       'notify_type': b[item][0][3],
+                       'has_read': b[item][0][4],
+                       'title' : b[item][0][5],
+                       'users' : []}
+            for i in range(0,l):
+                message['users'].append( {'user_name':b[item][i][1],
+                                          'user_url':b[item][i][2]} )
+                if b[item][i][4] == False:
+                    message['has_read'] = False
+            a.append(message)
+    
+    messages = []
+    messages_merge(messages, u_messages)
+    messages_merge(messages, t_messages)
+    return messages
+
+def clean_commonMessages(user,raw_messages):
+    messages = []
+    r_messages = {}
+    for item in raw_messages:
+        question_id = item.notify_question.id
+        question_title = item.notify_question.title
+        question_url = item.notify_question.get_absolute_url()
+        user_name = item.notify_from_user.fullname
+        user_url = item.notify_from_user.get_absolute_url()
+        notify_type = item.notify_type
+        has_read = item.has_read
+        if notify_type == 'CF' or notify_type == 'IF':
+            messages.append({'question_id':question_id,'question_url':question_url,
+                             'user_name':user_name,'user_url':user_url,
+                             'notify_type':notify_type,'has_read':has_read, 'question_title':question_title})
+        elif notify_type == 'RF' or notify_type == 'RQ':    
+            data = {'question_id':question_id,'question_url':question_url,
+                    'user_name':user_name,'user_url':user_url,
+                    'notify_type':'R','has_read':has_read, 'question_title':question_title}
+            if r_messages.has_key(question_id):
+                r_messages[question_id].append( data )
+            else:
+                r_messages[question_id] = [data,]
+   
+    def user_merge(users):
+        merged = {}
+        for user in users:
+            merged[user['user_name']] = user['user_url']
+        merged_users = []
+        for user in merged:
+            merged_users.append({'user_name':user,'user_url':merged[user]})
+        return merged_users
+    
+    for question_id in r_messages:       
+        data = {'question_id':question_id,'question_url':r_messages[question_id][0]['question_url'],
+                'users':[],
+                'notify_type':r_messages[question_id][0]['notify_type'],'has_read':r_messages[question_id][0]['has_read'],
+                'question_title':r_messages[question_id][0]['question_title']}
+        for item in r_messages[question_id]:
+            data['users'].append({'user_name':item['user_name'],'user_url':item['user_url']})
+        data['users'] = user_merge(data['users'])
+        messages.append(data)                
+    return messages            
+
+MESSAGE_TIMEOUT= 10
 
 @login_required    
 def getMessageList(request):
@@ -205,30 +316,42 @@ def getMessageList(request):
         messageType = request.GET['messageType']
         args = dict()
         zhihuuser = request.user.zhihuuser
-        messages = Notification.objects.filter(notify_to_user__id=zhihuuser.id)
-        args['messages'] = messages
+        notifies = Notification.objects.filter(~Q(notify_from_user__id=zhihuuser.id))\
+                                    .filter(notify_to_user__id=zhihuuser.id)
         
         if messageType == 'thanks':
             if cache.get('thanksmessage') == None:
                 print 'thanks messages are generating...'
+                messages = notifies.filter( Q(notify_type='U') | Q(notify_type='T') )
+                args['messages'] = clean_thanksmessages(zhihuuser, messages)
+#                 args['messages'] = messages
                 response = render(request,'thanksmessage.html',args)
                 cache.set('thanksmessage', response, MESSAGE_TIMEOUT)
+                mark_as_read(zhihuuser,'thanks')
             else:
                 print 'get thanks messages from cache'
             return cache.get('thanksmessage')
         elif messageType == 'user':
             if cache.get('usermessage') == None:
                 print 'user messages are generating...'
+                messages = notifies.filter( Q(notify_type='F') )
+                args['messages'] = messages
                 response = render(request,'usermessage.html',args) 
-                cache.set('usermessage', response, MESSAGE_TIMEOUT) 
+                cache.set('usermessage', response, MESSAGE_TIMEOUT)
+                mark_as_read(zhihuuser,'user') 
             else:
                 print 'get user messages from cache'
             return cache.get('usermessage')
         elif messageType == 'common':
             if cache.get('commonmessage') == None:
                 print 'common messages are generating...'
+                messages = notifies.filter( Q(notify_type='RF') | Q(notify_type='RQ') \
+                                        | Q(notify_type='CF') | Q(notify_type='IF') )
+                args['messages'] = clean_commonMessages(zhihuuser, messages)
+#                 args['messages'] = messages
                 response = render(request,'commonmessage.html',args) 
-                cache.set('commonmessage', response, MESSAGE_TIMEOUT)                 
+                cache.set('commonmessage', response, MESSAGE_TIMEOUT) 
+                mark_as_read(zhihuuser,'common')                
             else:
                 print 'get common messages from cache'
             return cache.get('commonmessage')

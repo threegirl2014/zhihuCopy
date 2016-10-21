@@ -4,7 +4,7 @@ from django.db import models
 from django.core.urlresolvers import reverse
 from django.dispatch.dispatcher import receiver
 from django.db.models.signals import post_save, post_delete
-from django.db.models import F
+from django.db.models import F, Q
 
 from django_redis import get_redis_connection
 # Create your models here.
@@ -92,6 +92,7 @@ class Notification(models.Model):
                    ('RF','replyFromFollowee'),
                    ('UF','upvoteFromFollowee'),
                    ('IF','interestFromFollowee'),
+                   ('CF', 'createdFromFollowee'),
                    )
     create_date = models.DateTimeField(auto_now_add=True)
     notify_from_user = models.ForeignKey('zhihuuser.ZhihuUser', related_name='notify_from_user')
@@ -120,6 +121,8 @@ class UserNotificationCounter(models.Model):
 
     
 def createNotifications(from_user,to_user,notify_type,topic=None,question=None,reply=None,comment=None):
+    if from_user == to_user:
+        return
     if notify_type == 'F':
         Notification.objects.create(
                             notify_from_user=from_user,
@@ -139,21 +142,32 @@ def createNotifications(from_user,to_user,notify_type,topic=None,question=None,r
                             notify_from_user=from_user,
                             notify_to_user=to_user,
                             notify_type=notify_type,
-                            notify_topic=topic,
                             notify_question=question,
                             notify_reply=reply, 
                             notify_comment=comment,                           
                             )    
     elif notify_type == 'RQ' or notify_type == 'RF' \
-      or notify_type == 'UF' or notify_type == 'IF':
+      or notify_type == 'UF':
         for user in to_user:
+            if from_user == to_user:
+                continue
             Notification.objects.create(
                                 notify_from_user=from_user,
                                 notify_to_user=user,
                                 notify_type=notify_type,
                                 notify_question=question,
                                 notify_reply=reply,                            
-                                )            
+                                )
+    elif notify_type == 'CF' or notify_type == 'IF':
+        for user in to_user:
+            if from_user == to_user:
+                continue
+            Notification.objects.create(
+                                notify_from_user=from_user,
+                                notify_to_user=user,
+                                notify_type=notify_type,
+                                notify_question=question,                          
+                                )                     
 
 def deleteNotifications(from_user,to_user,notify_type,topic=None,question=None,reply=None,comment=None):
     if notify_type == 'F':
@@ -177,14 +191,13 @@ def deleteNotifications(from_user,to_user,notify_type,topic=None,question=None,r
                             notify_from_user=from_user,
                             notify_to_user=to_user,
                             notify_type=notify_type,
-                            notify_topic=topic,
                             notify_question=question,
                             notify_reply=reply, 
                             notify_comment=comment,                           
                             )
         notification.delete()             
     elif notify_type == 'RQ' or notify_type == 'RF' \
-      or notify_type == 'UF' or notify_type == 'IF':
+      or notify_type == 'UF':
         for user in to_user:
             notification = Notification.objects.get(
                                 notify_from_user=from_user,
@@ -194,8 +207,17 @@ def deleteNotifications(from_user,to_user,notify_type,topic=None,question=None,r
                                 notify_reply=reply,                            
                                 ) 
             notification.delete()
-
-
+    elif notify_type == 'CF' or notify_type == 'IF':
+        for user in to_user:
+            notification = Notification.objects.get(
+                                notify_from_user=from_user,
+                                notify_to_user=user,
+                                notify_type=notify_type, 
+                                notify_question=question,                                              
+                                                )
+            notification.delete() 
+        
+        
 RK_NOTIFICATIONS_COUNTER = 'redis_pending_counter_changes'            
 def update_unread_count(user_id,count):
 #     UserNotificationCounter.objects.filter(pk=user_id).update(unread_count = F('unread_count') + count)
@@ -219,11 +241,18 @@ def decr_notifications_counter(instance,**kwargs):
     else:
         return 
     
-def mark_as_read(user,notification_id=None):
-    if notification_id == None:
+def mark_as_read(user,notificationType=None):
+    rows = 0
+    if notificationType == None:
         print 'MARK ALL: ', user
         rows = Notification.objects.filter(notify_to_user=user,has_read=False).update(has_read=True)
     else:
-        print 'MARK ONE: ', notification_id
-        rows = Notification.objects.filter(pk=notification_id,has_read=False).update(has_read=True)
+        raw = Notification.objects.filter(notify_to_user=user,has_read=False)
+        if notificationType == 'user':
+            rows = raw.filter( Q(notify_type='F') ).update(has_read=True)
+        elif notificationType == 'thanks':
+            rows = raw.filter( Q(notify_type='U') | Q(notify_type='T') ).update(has_read=True)
+        elif notificationType == 'common':
+            rows = raw.filter( Q(notify_type='RF') | Q(notify_type='RQ') \
+                            | Q(notify_type='CF') | Q(notify_type='IF') ).update(has_read=True)
     update_unread_count(user.id, 0-rows)             

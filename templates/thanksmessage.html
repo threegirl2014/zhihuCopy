@@ -6,7 +6,11 @@
 		{% else %}
 	<li class="list-group-item list-group-item-info">
 		{% endif %}
-		获得 1 次赞同： <a href="{{notify.notify_question.get_absolute_url}}">{{notify.notify_question}} </a>来自<a href="{{notify.notify_from_user.get_absolute_url}}"> {{notify.notify_from_user.fullname}} </a>
+		{% for user in notify.users %}
+		<a href="{{user.user_url}}"> {{user.user_name}}&nbsp;</a>
+		{% endfor %}
+		&nbsp;赞了你在&nbsp;<a href="{{notify.question_url}}">{{notify.title}} </a>
+		&nbsp;中的回答
 	</li>
 	{% elif notify.notify_type == 'T' %}
 		{% if notify.has_read %}
@@ -14,7 +18,11 @@
 		{% else %}
 	<li class="list-group-item list-group-item-info">
 		{% endif %}
-		获得 1 次感谢： <a href="{{notify.notify_question.get_absolute_url}}">{{notify.notify_question}} </a>来自<a href="{{notify.notify_from_user.get_absolute_url}}"> {{notify.notify_from_user.fullname}} </a>
+		{% for user in notify.users %}
+		<a href="{{user.user_url}}"> {{user.user_name}}&nbsp;</a>
+		{% endfor %}
+		&nbsp;感谢了你在&nbsp;<a href="{{notify.question_url}}">{{notify.title}} </a>
+		&nbsp;中的回答
 	</li>					
 	{% endif %}
 	{% endfor %}
