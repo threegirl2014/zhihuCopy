@@ -46,4 +46,8 @@ urlpatterns = [
     
     url(r'^follow/$', zhihuuserViews.modify_follow, name='modifyFollow'),
     
+    url(r'^buttom/$', zhihuuserViews.buttom, name='buttom'),
+    url(r'^top/$', zhihuuserViews.top, name='top'),
+    url(r'^interval/$', zhihuuserViews.interval, name='interval'),
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

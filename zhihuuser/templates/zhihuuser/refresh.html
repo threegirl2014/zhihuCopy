@@ -1,0 +1,18 @@
+{% for notify in notifies_from_followee %}
+<ul class="list group">
+	<li class="list-group-item">
+		<img class="Avatar" src="{{notify.notify_from_user.avatar.url}}">
+		<a href="{{notify.notify_from_user.get_absolute_url}}"> &nbsp;&nbsp;{{notify.notify_from_user.fullname}}&nbsp; </a>
+		{% if notify.notify_type == 'RF' %}
+		&nbsp;回答了该问题&nbsp;
+		{% elif notify.notify_type == 'UF' %}
+		&nbsp;赞同了该回答&nbsp;
+		{% elif notify.notify_type == 'IF' %}
+		&nbsp;关注了该问题&nbsp;							
+		{% elif notify.notify_type == 'CF' %}
+		&nbsp;提出了该问题&nbsp;
+		{% endif %}
+		<a href="notify.notify_question.get_absolute_url">{{notify.notify_question}}</a>
+	</li>
+</ul>
+{% endfor %}

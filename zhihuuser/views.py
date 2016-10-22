@@ -14,6 +14,8 @@ from questions.models import Notification, UserNotificationCounter
 from questions.models import createNotifications, deleteNotifications
 from django.http.response import HttpResponse
 
+import json
+from django.utils.datastructures import MultiValueDictKeyError
 # Create your views here. 
 
 def generateUsername(fullname):
@@ -70,6 +72,8 @@ def weblogin(request):
     else:
         return home(request)
 
+STEP = 3
+
 def home(request):
     if request.user.is_authenticated():
         zhihuuser = request.user.zhihuuser
@@ -82,7 +86,24 @@ def home(request):
         args = dict()
         args['zhihuuser'] = zhihuuser
         args['user'] = zhihuuser.user
-        args['notifies_from_followee'] = notify_from_followee
+        notify_num = notify_from_followee.count() 
+        if notify_num >= STEP:
+            new_notifies = notify_from_followee[:STEP]
+            args['begin'] = notify_from_followee[0].id
+            args['end'] = notify_from_followee[STEP-1].id
+            args['count'] = STEP
+        elif notify_num != 0:
+            new_notifies = notify_from_followee
+            args['begin'] = notify_from_followee[0].id
+            args['end'] = notify_from_followee[notify_num-1].id
+            args['count'] = notify_num
+        else:
+            new_notifies = notify_from_followee
+            args['begin'] = 0
+            args['end'] = 0
+            args['count'] = 0
+        args['notifies_from_followee'] = new_notifies
+        print 'begin:{0},end:{1}'.format(args['begin'], args['end'])
         args['message_count'] = UserNotificationCounter.objects.get(pk=zhihuuser.id).unread_count 
         return render(request,"zhihuuser/home.html",args)
     else:
@@ -92,6 +113,80 @@ def home(request):
         return render(request,"zhihuuser/not_logged_in.html",args)
 
 @login_required
+def buttom(request):
+    if request.method == 'GET':
+        top = int(request.GET['top'])
+        bottom = int(request.GET['bottom'])
+        count = int(request.GET['count'])
+        zhihuuser = request.user.zhihuuser
+        if bottom:
+            notify_from_followee = \
+                Notification.objects.filter(notify_to_user__id=zhihuuser.id)\
+                                    .filter( Q(notify_type='RF') | \
+                                             Q(notify_type='UF') | \
+                                             Q(notify_type='IF') | \
+                                             Q(notify_type='CF'))
+            notifies = notify_from_followee.filter(pk__lte=top) 
+            if notifies.count() <= count + STEP:
+                bottom_id = 0
+            else:
+                notifies = notifies[:count+STEP]
+                bottom_id = notifies[count+STEP-1].id
+            args = {}
+            args['notifies_from_followee'] = notifies 
+            response = render(request, 'zhihuuser/refresh.html', args)
+            data = {'bottom_id':bottom_id,'response':response.content,'count':notifies.count()}
+            return HttpResponse(json.dumps(data))
+
+@login_required
+def interval(request):
+    if request.method == 'GET':
+        try:
+            top = int(request.GET['top_id'])
+        except MultiValueDictKeyError,e:
+            print e
+            print request.GET, request.get_full_path(), request.user
+            top = 0
+        zhihuuser = request.user.zhihuuser
+        if top:
+            notify_from_followee = \
+                Notification.objects.filter(notify_to_user__id=zhihuuser.id)\
+                                    .filter( Q(notify_type='RF') | \
+                                             Q(notify_type='UF') | \
+                                             Q(notify_type='IF') | \
+                                             Q(notify_type='CF'))
+            notifies = notify_from_followee.filter(pk__gt=top)
+            return HttpResponse(notifies.count())            
+        return HttpResponse(0)
+    
+@login_required
+def top(request):
+    if request.method == 'GET':
+        zhihuuser = request.user.zhihuuser
+#         top = int(request.GET['top'])
+#         bottom = int(request.GET['bottom'])
+        count = int(request.GET['count'])   
+        refresh = int(request.GET['refresh'])     
+        if top:
+            notify_from_followee = \
+                Notification.objects.filter(notify_to_user__id=zhihuuser.id)\
+                                    .filter( Q(notify_type='RF') | \
+                                             Q(notify_type='UF') | \
+                                             Q(notify_type='IF') | \
+                                             Q(notify_type='CF'))
+            notifies = notify_from_followee
+            if notifies.count() > count + refresh:
+                notifies = notifies[:count+refresh]
+            top_id = notifies[0].id
+            count = notifies.count()
+            bottom_id = notifies[count-1].id
+            args = {}
+            args['notifies_from_followee'] = notifies             
+            response = render(request,'zhihuuser/refresh.html',args)
+            data = {'bottom_id':bottom_id,'top_id':top_id,'response':response.content,'count':notifies.count()}
+            return HttpResponse(json.dumps(data))
+        
+@login_required
 def people(request,name):
     stranger = ZhihuUser.objects.get(user__username=name)
     zhihuuser = request.user.zhihuuser
@@ -100,6 +195,7 @@ def people(request,name):
     args['zhihuuser'] = zhihuuser
     args['stranger'] = stranger
     args['isfollow'] = isfollow
+    args['message_count'] = UserNotificationCounter.objects.get(pk=zhihuuser.id).unread_count
     return render(request,"zhihuuser/people.html",args)
 
 def weblogout(request):
