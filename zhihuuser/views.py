@@ -66,6 +66,7 @@ def weblogin(request):
             new_user = authenticate(username=user.username,password=password)
             print 'login successfully'
             login(request,new_user)
+            request.session['user'] = new_user.username
             return redirect('/')
         else:
             return render(request,"zhihuuser/not_logged_in.html",args)
@@ -76,6 +77,8 @@ STEP = 3
 
 def home(request):
     if request.user.is_authenticated():
+        print request.COOKIES['sessionid']
+        print request.session
         zhihuuser = request.user.zhihuuser
         notify_from_followee = \
             Notification.objects.filter(notify_to_user__id=zhihuuser.id)\
@@ -199,6 +202,7 @@ def people(request,name):
     return render(request,"zhihuuser/people.html",args)
 
 def weblogout(request):
+    del request.session['user']
     logout(request)
     return redirect('/')
 
